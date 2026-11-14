@@ -176,7 +176,7 @@ own table.
 * **Excursions:** when the bottom run reaches 2, the next run becomes the bottom after a merge cascade. That is
   safe when the next run is long; a short one (about 4 or less) would put the run off sync, and then it halts.
 
-**The real run, followed to phase 5,200 with no halt.** Excursions (phase, run above the bottom, new bottom
+**The real run, followed to phase 7,719 with no halt.** Excursions (phase, run above the bottom, new bottom
 after the cascade):
 
 | phase | run above the bottom | new bottom |
@@ -188,11 +188,17 @@ after the cascade):
 | 3,321 | 555 | 1542 (phase 3324) |
 | 4,866 | 102 | 302 (phase 4870) |
 | 5,172 | 1052 | 2498 (phase 5177) |
+| 7,675 | 3596 | 6930 (phase 7680) |
 
 ("new bottom" is the bottom run when it starts losing one cell per phase again.)
 
-Phases 91 to 487 agree with Koshta's direct follow; 3,321, 4,866 and 5,172 are the ones he predicted from the
-frozen low region, and all three happened as predicted, including the new bottom and the next run.
+Phases 91 to 487 agree with Koshta's direct follow. 3,321, 4,866 and 5,172 are the excursions he predicted from
+the frozen low region, with their next runs and new bottoms; all three happened as predicted (his new bottoms
+1,542, 300 and 2,497 against 1,542, 302 and 2,498 here, measured one or two phases later). He gave about 7,675 for
+the one after with next run 3,596: it happened at 7,675 with next run 3,596. The next
+excursion is due near phase 14,600 (the bottom run after 7,675 is about 6,930). The per-phase logs of this run are
+in `phase_sim/data/` (`real_low.txt.gz`: the lowest 24 runs at every phase start; `real_log.txt.gz`: per phase
+the size of `b`, the length of `r` and the macro steps used).
 
 **The digit parse is a two-state machine (exact).** Split `r` into units `0^g 1^n`. Between units the parse
 (`rest`) is always in one of two states, and which one is the parity of the unit's start cell. A unit starting at
