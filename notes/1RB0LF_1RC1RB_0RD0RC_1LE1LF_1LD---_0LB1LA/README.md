@@ -136,7 +136,70 @@ Dennis Koshta's notes (Oct 2026) on the same machine go further than these:
 The most promising route to a proof is therefore to port `SBCv9.v` and add an invariant for the
 merge wave, not to start from scratch.
 
-## 6. Reproduce
+## 6. Phase-level simulation (Nov 2026)
+
+`phase_sim/` follows the real run phase by phase, using the macro steps of the upstream halting proof for the
+twin (`verify/SBCv9.v`, Module TM2) instead of new ones.
+
+**The representation.** Mirror this machine and rename its states A..F to A, C, D, E, G, F. The result is TM2
+except at two places: `A0` (TM2 needs 3 steps, and halts if the cell beyond is 1; here 1 step, no halt) and the
+`E` walk over 0s (TM2 stays in E; here E and G alternate, and G on a 1 halts). A configuration is
+`LC a b {{{(hL',L)}}} r` or `LC a b {{{(hR',R)}}} r`: a timer `0^inf 1^a (10)^b` left of the head and a counter
+word `r` right of it. `phase_sim/msim.py` is a line-by-line port of TM2's `mstep`: the timer lemmas `LInc`,
+`LIncs`, `LOv`, `LRst_101`, `LRst_11`, the counter arithmetic `rest` / `RIncs` (the word read as a binary number:
+4-cell digits `0000` = 0, `0110` = 1, `0011` / `0111` switch to 2-cell digits `00` = 0, `10` = 1, with `11` pairs
+skipped), and a direct simulation for each `sweep` (`sideRLs_c` with `hR' -> hL'`). The sweeps run this machine's
+own table.
+
+**Checks.**
+
+* On TM2 the port reproduces the upstream run exactly: 12,417 macro steps, 374 overflows, `a` of 373 bits,
+  `b` of 378 bits, then TM2 halts inside a sweep (`B` reading 1), as in `SBCv9.v`.
+* The timer lemmas, brute-forced on this machine for `a <= 15`, `b <= 5`: they hold exactly when `a` is odd,
+  and the machine halts when `a` is even (Koshta found the same). `RIncs` against `k` single sweeps on random
+  digit words: 2,669 / 2,669 equal.
+* From the blank tape this machine reaches the same start `LC 11 5 {{{(hL',L)}}} [1;0]` (step 301).
+* The phase lengths `b + 1` after each overflow are 418, 838, 1678, 3358, 6722, 13446, ..., the block lengths
+  seen in direct simulation (6,722 = 6,718 + 4 at the absorption phase).
+
+**What it shows.**
+
+* `a = 3 (mod 4)` always: every overflow sets `a := 3` and every other step adds 4. So the timer side cannot
+  halt, and **a halt can only happen inside a sweep over the counter word `r`**.
+* At a phase start `r` is a list of runs of 1s separated by `000`. Each phase changes it in three places only:
+  the bottom run loses one cell; a few waves change a few runs each; the top, where the counter writes new runs.
+  Everything else is frozen.
+* The lowest wave sits exactly where the digit parse (`rest`) stops: below it every `000 1^n` reads as two
+  counter digits; above it are old runs. The wave moves up about one run per two phases. In one cycle
+  `z3 X z3 Y -> z4 (X-2) z3 (Y+1) -> z3 (X-1) z3 (Y-1) ...`; at some runs it makes a gap of 2 and the two runs
+  merge next phase (for example `155 z2 216 -> 373`). The exact rule is not worked out.
+* **Excursions:** when the bottom run reaches 2, the next run becomes the bottom after a merge cascade. That is
+  safe when the next run is long; a short one (about 4 or less) would put the run off sync, and then it halts.
+
+**The real run, followed to phase 5,200 with no halt.** Excursions (phase, run above the bottom, new bottom
+after the cascade):
+
+| phase | run above the bottom | new bottom |
+|---|---|---|
+| 91 | 14 | 24 (phase 95) |
+| 119 | 77 | 93 (phase 122) |
+| 215 | 93 | 269 (phase 218) |
+| 487 | 700 | 2824 (phase 497) |
+| 3,321 | 555 | 1542 (phase 3324) |
+| 4,866 | 102 | 302 (phase 4870) |
+| 5,172 | 1052 | 2498 (phase 5177) |
+
+("new bottom" is the bottom run when it starts losing one cell per phase again.)
+
+Phases 91 to 487 agree with Koshta's direct follow; 3,321, 4,866 and 5,172 are the ones he predicted from the
+frozen low region, and all three happened as predicted, including the new bottom and the next run.
+
+**What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
+what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
+reaches 2. The timer side is done: the `SBCv9.v` lemmas carry over under `a` odd, and `a` is odd by a trivial
+induction.
+
+## 7. Reproduce
 
 ```bash
 cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/tools
@@ -144,6 +207,18 @@ python3 sbc9.py check                                   # self-test against the 
 python3 sbc9.py count 110000000000 30 70                # counter from a small start (section 3)
 gcc -O2 -o samp samp.c && ./samp 1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA 3000000 C 0 R | head -60
 gcc -O2 -o bstat bstat.c && ./bstat 1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA 1000000000
+```
+
+Phase-level simulation (needs Python 3 and a C compiler):
+
+```bash
+cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/phase_sim
+gcc -O3 -shared -fPIC -o libsweep.so sweep.c
+python3 test_tm2.py              # the port on TM2: 12417 macro steps, 374 overflows, then TM2 halts
+python3 check_lemmas.py          # timer lemmas on this machine (ok for odd a); add "tm2" for TM2
+python3 check_rincs.py           # RIncs vs single sweeps
+python3 run37.py out 10000       # the real run: out.log (per phase), out.low (lowest runs per phase), out.ckpt
+python3 excursions.py out.low     # the excursion table above
 ```
 
 Analysis by messerdsp, with Claude Opus 5.5.
