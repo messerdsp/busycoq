@@ -217,8 +217,13 @@ changed; `X, Y, Z` are consecutive runs above the wave, gaps written `zK`):
   `Y = 2`, makes the gap after it `z2` and `Z -> Z+1`. (Lengths 2 to 41 tested.)
 * `z3 X z3 Y` at the wave (the other phase): `X` even: `z4 (X-2) z3 (Y+1)`; `X` odd: `z4 X z2 Y`; `X = 2`: the 2-run is
   erased, `z7 (Y+1)` (this is where the `z7` gaps in the frozen region come from).
-* With a `z2` already present the result also depends on the parity of the next runs (a merge `X + Y + 2` when `X`
-  is even, otherwise the wave skips the pair). Not yet complete.
+* `z4 X z2 Y z3 Z z3 W`: `X` even: `X -> X+1`, the pair `X z2 Y` is left alone, and the first rule acts one pair
+  higher with `Y, Z` in place of `X, Y` (if `Y + Z` is even, `Z -> Z+1` and a `z2` after it; else `Z -> Z-1`,
+  `W -> W+1`). `X` odd: `X+1` and `Y` merge (`X + Y + 3`) and the rest depends on the parities of `Y` and `Z`.
+* `z3 X z2 Y` at the wave: `X` even: merge `X + Y + 2`; `X` odd: the pair is skipped and the first rule acts on
+  `Y, Z`.
+* Not complete: the merge cases chain, so the full rule is a small transducer over (parse state, gap, run parity,
+  runs of length 2 to 4) that has not been tabulated. Every case tested so far depends only on these features.
 
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
