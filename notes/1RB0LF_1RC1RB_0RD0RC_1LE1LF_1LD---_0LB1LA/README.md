@@ -194,6 +194,32 @@ after the cascade):
 Phases 91 to 487 agree with Koshta's direct follow; 3,321, 4,866 and 5,172 are the ones he predicted from the
 frozen low region, and all three happened as predicted, including the new bottom and the next run.
 
+**The digit parse is a two-state machine (exact).** Split `r` into units `0^g 1^n`. Between units the parse
+(`rest`) is always in one of two states, and which one is the parity of the unit's start cell. A unit starting at
+cell `p` parses iff `g = 3 (mod 4)` or `g + 2p = 0 (mod 4)` (so gaps of 3 or 7 always parse, a gap of 2 or 4 only at
+one parity, a gap of 1 or 5 never). Each unit then gives 2 or 3 digits whose values depend on the parity of `n`:
+the counter value is written in run-length parities. Checked: the predicted stop is the real stop at all 401
+phase starts from 600 to 1,000 (`phase_sim/transducer.py`).
+
+Because the frozen region moves one cell relative to `r[0]` every phase, the parity of every `p` flips each phase.
+A gap of 2 or 4 therefore blocks the parse every other phase: this is the two-phase rhythm of the waves.
+
+**One carry per wave per phase.** Within a phase the counter is filled up to the lowest blocking gap, then one
+single-increment sweep carries into it and rewrites a few cells there, the parse continues to the next blocking
+gap, and so on up the word (`phase_sim/frontier.py`, and the per-step cell ranges in a phase). So each wave moves
+by exactly one local rewrite per phase.
+
+**Wave rules found so far** (`phase_sim/waveexp.py`: one phase from a real word with only the runs at the wave
+changed; `X, Y, Z` are consecutive runs above the wave, gaps written `zK`):
+
+* `z4 X z3 Y z3 Z`: `X -> X+1` and the `z4` becomes `z3`; then if `X + Y` is even, `Y -> Y+1` and the gap after `Y`
+  becomes `z2` (a merge next phase); if odd, `Y -> Y-1` and `Z -> Z+1`. Exception: `Y = 2` with `X + Y` odd keeps
+  `Y = 2`, makes the gap after it `z2` and `Z -> Z+1`. (Lengths 2 to 41 tested.)
+* `z3 X z3 Y` at the wave (the other phase): `X` even: `z4 (X-2) z3 (Y+1)`; `X` odd: `z4 X z2 Y`; `X = 2`: the 2-run is
+  erased, `z7 (Y+1)` (this is where the `z7` gaps in the frozen region come from).
+* With a `z2` already present the result also depends on the parity of the next runs (a merge `X + Y + 2` when `X`
+  is even, otherwise the wave skips the pair). Not yet complete.
+
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
 reaches 2. The timer side is done: the `SBCv9.v` lemmas carry over under `a` odd, and `a` is odd by a trivial
