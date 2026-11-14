@@ -119,7 +119,24 @@ my guess (not a result) is that none exists.
 
 `verify/SBCv13.v` (lemma `round`, `n+2 = 2^k*4`) is the closest template.
 
-## 5. Reproduce
+## 5. Related work
+
+Dennis Koshta's notes (Oct 2026) on the same machine go further than these:
+`DennisKoshta/denniskoshta-portfolio`, folder
+`public/busy-beaver/machines/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/`
+(`status.json`, `decision.json`). From his summary:
+
+* The machine is a mirror twin of `verify/SBCv9.v` Module TM2 (`1RB0RF_0LC---_1LD1LC_0LE0LD_1RE1RF_0RC1RA`),
+  which is proved to **halt**. Both follow the same macro run; TM2 halts at its 374th overflow,
+  and this machine survives that point.
+* TM2's left lemmas hold here exactly when `a` is odd, and `a = 3 mod 4` along the orbit.
+* An exact jump simulator followed the real orbit to phase 1,857 with no halt.
+* What is missing is a rule for the "merge wave" (his status: stuck, parked 2026-10-11).
+
+The most promising route to a proof is therefore to port `SBCv9.v` and add an invariant for the
+merge wave, not to start from scratch.
+
+## 6. Reproduce
 
 ```bash
 cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/tools
