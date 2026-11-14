@@ -259,8 +259,26 @@ excursion. Checks:
 * From phase 600 with jumps: the lowest 8 tokens are identical to the full run at every phase it visits, through
   the excursions at 3,321, 4,866, 5,172 and 7,675 (the tokens above were not on the tape at phase 600, so they are
   not exact there).
-* Forward runs from phase 10,000 with `N = 1,000` and `N = 1,300` agree with each other; the full run is being
-  continued to check the first predicted excursion.
+**Predicted excursions after phase 10,000** (from the phase 10,000 state; `N` = tokens kept):
+
+| phase | run above the bottom | bottom 10 phases later | agreed by |
+|---|---|---|---|
+| 14,609 | 3,749 | 5,977 | N = 1000, 1300, 2000 |
+| 20,595 | 42,177 | 54,376 | N = 1000, 1300, 2000 |
+| 74,980 | 11,715 | 77,168 | N = 1000, 1300, 2000 |
+| 152,157 | 114,247 | 174,179 | N = 1000, 1300, 2000 |
+| 326,345 | 82,349 | 118,753 | N = 1000, 1300, 2000 |
+| 445,107 | 201,658 | 410,262 | N = 1000, 1300, 2000 |
+| 855,378 | 65,463 | 155,963 | N = 1300, 2000 (N = 1000 differs here) |
+| 1,011,350 | 219,297 | 299,475 | N = 2000 only (N = 1300 differs here) |
+| 1,310,834 | 1,077 | 2,275 | N = 2000 only |
+| 1,313,118 | 2,287 | 3,027 | N = 2000 only |
+
+No short run (length <= 4) next to the bottom in this range. The horizon is limited by information, not by
+speed: an excursion merges many runs into the new bottom (`201,658 -> 410,262`), so a few hundred tokens are
+used per excursion, and the runs that will be next to the bottom after about phase `10^6` were not yet on the
+tape at phase 10,000. They are written later by the top, which depends on all of `b`. From a full state at phase
+`P` this method reaches roughly phase `100 P`.
 
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
