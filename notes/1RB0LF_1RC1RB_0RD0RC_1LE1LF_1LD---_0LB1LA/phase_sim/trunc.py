@@ -16,7 +16,7 @@ def cells(tk):
 st = pickle.load(open(sys.argv[1], 'rb')); N = int(sys.argv[2]); K = int(sys.argv[3]); bmode = sys.argv[4] if len(sys.argv) > 4 else 'keep'
 T = toks(st['r'])[:N]
 if T[-1][0] == 'z': T = T[:-1]
-b = st['b'] if bmode == 'keep' else int(bmode)
+b = st['b'] if bmode == 'keep' else (2**int(bmode[1:]) - 3 if bmode[0] == 'p' else (st['b'] % 2**int(bmode[1:]) + 2**int(bmode[1:]) * (2**1000 - 1) if bmode[0] == 'm' else int(bmode)))
 m = M(T37, st['a'], b, cells(T)); m.mode = st['mode']; m.nov = st['nov']
 t0 = time.time()
 for k in range(K):

@@ -242,8 +242,25 @@ excursion is written by the wave from the excursion before, a few phases after i
 **The low runs do not depend on the far tape.** From the phase 10,000 state with `r` cut after token 2,600
 (everything above replaced by blank tape), 10 phases give the same tokens as the full run up to the cut
 (`phase_sim/trunc.py`). They do depend on the counter `b` (with `b` replaced by a small value the run is different
-from the first phase), so a fast "excursion-level" simulation needs the way `b` enters the low digits, which is
-not worked out yet.
+from the first phase).
+
+**How `b` enters, and a fast exact predictor.** In one phase the counter adds `b` to a binary number written
+across all of `r`, with about one bit per token. One phase at 10,000 is 143 increment blocks: fill to the lowest
+wave (`2^2329`), one carry, fill to the next wave (`2^4823`), and so on up to the top (`2^10004`). Since
+`b_new + 3 = 2(b + 3 + s)` (`s` = right-moves in the phase), `b + 3` gains a factor 2 every quiet phase: at phase 10,000,
+`b + 3` is divisible by exactly `2^2326`, about the age of the lowest wave. Influence only goes upward (lower
+tokens and lower bits of `b` never depend on higher ones). So the first `N` tokens and `b mod 2^K` (with a large
+filler above bit `K`, so every carry is still delivered) give the low tokens exactly (`phase_sim/lowsim.py`).
+Between excursions the low tokens are frozen except the bottom run, which loses one cell per phase, so once the
+last wave has left the first `N` tokens and `b = -3 (mod 2^K)`, the predictor jumps straight to the next
+excursion. Checks:
+
+* From phase 10,000 with `N = 2,600` and `b mod 2^2800`: identical to the full run up to the cut.
+* From phase 600 with jumps: the lowest 8 tokens are identical to the full run at every phase it visits, through
+  the excursions at 3,321, 4,866, 5,172 and 7,675 (the tokens above were not on the tape at phase 600, so they are
+  not exact there).
+* Forward runs from phase 10,000 with `N = 1,000` and `N = 1,300` agree with each other; the full run is being
+  continued to check the first predicted excursion.
 
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
