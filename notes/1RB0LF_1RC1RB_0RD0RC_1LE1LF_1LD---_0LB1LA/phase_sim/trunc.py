@@ -1,0 +1,34 @@
+"""Locality test: truncate r after N tokens, run K phases, compare low tokens with the full run's dump."""
+import sys, pickle, time
+sys.path.insert(0, '/home/user/m9')
+from msim import *
+def toks(r):
+    out = []; i = 0
+    while i < len(r):
+        j = i
+        while j < len(r) and r[j] == r[i]: j += 1
+        out.append(('o' if r[i] else 'z') + str(j - i)); i = j
+    return out
+def cells(tk):
+    r = []
+    for t in tk: r += [1 if t[0] == 'o' else 0] * int(t[1:])
+    return r
+st = pickle.load(open(sys.argv[1], 'rb')); N = int(sys.argv[2]); K = int(sys.argv[3]); bmode = sys.argv[4] if len(sys.argv) > 4 else 'keep'
+T = toks(st['r'])[:N]
+if T[-1][0] == 'z': T = T[:-1]
+b = st['b'] if bmode == 'keep' else int(bmode)
+m = M(T37, st['a'], b, cells(T)); m.mode = st['mode']; m.nov = st['nov']
+t0 = time.time()
+for k in range(K):
+    P = m.nov
+    while m.nov == P: m.mstep()
+print('time', time.time() - t0, 'phase', m.nov, 'b_bits', m.b.bit_length())
+pickle.dump(toks(m.r_list()), open(sys.argv[5] if len(sys.argv) > 5 else '/tmp/trunc.out', 'wb'))
+ref = None
+for line in open('/home/user/m9/r2.low'):
+    p, *rest = line.split()
+    if int(p) == m.nov: ref = rest
+R = toks(m.r_list())
+if ref:
+    n = min(len(R), len(ref)); d = [i for i in range(n) if R[i] != ref[i]]
+    print('compared', n, 'first diff', d[:5], R[d[0]-2:d[0]+4] if d else '', ref[d[0]-2:d[0]+4] if d else '')

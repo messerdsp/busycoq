@@ -231,6 +231,20 @@ changed; `X, Y, Z` are consecutive runs above the wave, gaps written `zK`):
 * Not complete: the merge cases chain, so the full rule is a small transducer over (parse state, gap, run parity,
   runs of length 2 to 4) that has not been tabulated. Every case tested so far depends only on these features.
 
+**Every excursion starts a wave, and waves never die.** Write `r` as tokens (`zK` and `oN` alternate). Full
+token dumps 10 phases apart near phase 10,000 change only in a few clusters: the bottom run, the top, and clusters
+near token 2,333, 4,805, 5,099 and 6,574 at phase 10,010. Each cluster moves up by one token per phase (one run per
+two phases), and the age it implies matches an excursion: 7,675 (age 2,335), 5,172 (4,838), 4,866 (5,144),
+3,321 (6,689). Between two waves the runs are frozen. So an excursion is not only a local event: it starts a
+wave that rewrites every run above it, one by one, forever. The run that will be next to the bottom at the next
+excursion is written by the wave from the excursion before, a few phases after it starts.
+
+**The low runs do not depend on the far tape.** From the phase 10,000 state with `r` cut after token 2,600
+(everything above replaced by blank tape), 10 phases give the same tokens as the full run up to the cut
+(`phase_sim/trunc.py`). They do depend on the counter `b` (with `b` replaced by a small value the run is different
+from the first phase), so a fast "excursion-level" simulation needs the way `b` enters the low digits, which is
+not worked out yet.
+
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
 reaches 2. The timer side is done: the `SBCv9.v` lemmas carry over under `a` odd, and `a` is odd by a trivial
