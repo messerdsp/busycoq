@@ -176,7 +176,7 @@ own table.
 * **Excursions:** when the bottom run reaches 2, the next run becomes the bottom after a merge cascade. That is
   safe when the next run is long; a short one (about 4 or less) would put the run off sync, and then it halts.
 
-**The real run, followed to phase 7,719 with no halt.** Excursions (phase, run above the bottom, new bottom
+**The real run, followed to phase 10,000 with no halt.** Excursions (phase, run above the bottom, new bottom
 after the cascade):
 
 | phase | run above the bottom | new bottom |
