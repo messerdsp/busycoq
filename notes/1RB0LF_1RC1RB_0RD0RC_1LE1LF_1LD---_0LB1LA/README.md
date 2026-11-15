@@ -532,7 +532,9 @@ carry meets a window outside the 21 (the local invariant) or when `b = 0` and th
 The two parts behave very differently (`phase_sim/randb.py`): run the same macro model from the blank tape but
 replace `b` by a random number at every overflow (same bit length, or a random length). Over 20 runs of up to 80
 phases no carry ever meets a window outside the 21, so the local invariant looks independent of `b`, and a proof of
-it on words alone is plausible. But every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0`
+it on words alone is plausible. A stronger test (`phase_sim/randk.py`): set `b` to a random value before every
+macro step (often 0 to 3, so increments and overflows happen at arbitrary times; an overflow that would get stuck
+is replaced by a small `b`). Over 20 runs of 4,000 macro steps, all 22,308 sweeps are covered by the 21 lemmas. But every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0`
 and the word starts with none of `00`, `101`, `11`). So staying alive depends on the exact value of `b`, the
 "sync" of the class name, and any proof of the global part has to track `b` exactly (as the marker bits above).
 
