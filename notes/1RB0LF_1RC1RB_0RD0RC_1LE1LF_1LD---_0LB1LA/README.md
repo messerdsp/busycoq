@@ -20,6 +20,22 @@ Everything below marked *(sim)* was checked by direct simulation; apart from the
   wave process, and with a random counter the model hits a bad overflow within 80 phases every time. No invariant
   is known; heuristically a halt is very unlikely.
 
+**Picking this up (for another person or model).** Everything needed is in this folder; no other context is assumed.
+
+* *The open statement*, exactly: `holdout_nonhalt_of_no_bad` in `rocq/M9Total.v` reduces non-halting to
+  `forall m, iterL m (LL 5 5 [1;0]) <> None` for the list machine `stepL` (`rocq/M9List.v`). A proof of that, or
+  an `m` where it fails (then the machine halts and the proof is a computation, as for TM2 in `verify/SBCv9.v`),
+  settles the holdout.
+* *Read first*: "Where things stand" above, then section 6 (phases, waves, excursions, the halt route) and
+  section 4 (what failed).
+* *Tools*: `phase_sim/lowsim_c.c` (C, about 70x the Python; `NOFILL=1` with a huge `N` runs the exact full tape),
+  `fullmodel.py` / `lineage.py` (the 13-rule model with run ids), `haltgrid2.py` / `routeone.py` (what a short run at
+  an excursion does). Exact tapes: `phase_sim/data/state{10000,14700,15000,20000}.txt.gz`.
+* *Ideas not yet tried*: an exact transducer for one wave pass (section 6 lists the cases found so far) and a search
+  for a property of the runs next to the bottom that every wave and excursion preserves; a run-length version of
+  the exact simulator (each sweep replaced by the proved carry rule) to get exact tapes at phase 10^5 to 10^6 and
+  so a longer predicted horizon.
+
 | state | read 0 | read 1 |
 |---|---|---|
 | A | 1RB | 0LF |

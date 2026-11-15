@@ -24,9 +24,11 @@ for k in range(K):
     P = m.nov
     while m.nov == P: m.mstep()
 print('time', time.time() - t0, 'phase', m.nov, 'b_bits', m.b.bit_length())
-pickle.dump(toks(m.r_list()), open(sys.argv[5] if len(sys.argv) > 5 else '/tmp/trunc.out', 'wb'))
+pickle.dump(toks(m.r_list()), open(sys.argv[5] if len(sys.argv) > 5 else 'trunc.out', 'wb'))
 ref = None
-for line in open('/home/user/m9/r2.low'):
+import gzip
+REF = os.environ.get('REFLOW', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'model_pure_10000_29438.txt.gz'))
+for line in (gzip.open(REF, 'rt') if REF.endswith('.gz') else open(REF)):
     p, *rest = line.split()
     if int(p) == m.nov: ref = rest
 R = toks(m.r_list())

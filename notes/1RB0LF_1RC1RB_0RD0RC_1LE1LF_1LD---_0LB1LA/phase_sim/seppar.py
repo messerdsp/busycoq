@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import toks
 from align import align
 from lowsim import load_state
-st = load_state(os.environ.get('OLDSTATE', '/home/user/m9/real10k.ckpt')); OLD = toks(st['r'])[:2300]
+st = load_state(os.environ.get('OLDSTATE', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'state10000.txt.gz'))); OLD = toks(st['r'])[:2300]
 line = open(sys.argv[1]).readlines()[int(sys.argv[2])].split(); NEW = line[1:]
 front = next(i for i in range(2, len(NEW)) if NEW[i][0] == 'z' and NEW[i] != 'z3')
 X = [int(t[1:]) for t in OLD[7::2]]; Y = [int(t[1:]) for t in NEW[3:front:2]]
