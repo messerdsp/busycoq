@@ -322,6 +322,24 @@ probably the position parity, are part of the state. Mining the logs (`phtab.py`
 features still leaves about one sample per key, so the full table has to come from controlled tests like the
 one above, run over all front configurations and both phase parities. That is the next step.
 
+**The counter `b` is one marker bit per wave.** At phase 14,700, `b + 3 = 2^91 E` with `E` having 14 one-bits in
+14,613 bits, and the gaps between them (6,934, 2,833, 2,502, 1,544, 305, ...) are the gaps between past excursions
+(7,675 -> 14,609, 487 -> 3,321, 5,172 -> 7,675, 3,321 -> 4,866, 4,866 -> 5,172). The counter only changes at
+excursions (`s = 0` in quiet phases, so `b + 3` just doubles), and each excursion leaves one bit that then moves up one
+place per phase: the bit sits exactly at its wave (`v2(b + 3)` = age of the lowest wave). So `b` holds no hidden
+history beyond the wave positions, and the whole state is the run list plus the waves. Flipping single bits of `b`
+(`phase_sim/bflip.py`) confirms that bit `j` acts on the tape near token `j`.
+
+**The wave's hidden state is an offset.** The marker bit moves one digit per phase, while the front moves by
+whole runs (each run is 2 or 3 digits depending on its parity). Their difference `d` (digits below the front minus
+`v2(b + 3)`) is a real part of the wave's state; it explains the ambiguity in the controlled tests (it also means
+varying the run below the front, as in the test above, produces states that cannot occur). Varying only the runs
+above the front, over 208 real front positions between phases 14,701 and 15,300 (`phase_sim/tabfront2.py`):
+keyed on gaps and parities alone, 48 of 128 keys have two outcomes for the next three runs; adding `d`, 8 of 464;
+adding one more gap and the run below the front, 0 of 800. For outcomes reaching further up a few conflicts remain,
+and `d` takes values from -8 to 3, more than expected, so the front detection or the definition of `d` still needs
+work. Next: define the wave state exactly (front position, `d`, pending `z2`/`z4`) and tabulate the transducer on it.
+
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
