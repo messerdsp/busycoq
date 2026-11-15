@@ -3,7 +3,22 @@
 BB(6) holdout (on the 608 list of 30 Oct 2026; spreadsheet class *Sync bouncer counter*).
 **Status: open.** No proof here: analysis notes, tools to reproduce them, and a Rocq reduction (`rocq/`,
 section 6): the holdout does not halt if an explicit list machine never reaches a "bad overflow".
-Everything below marked *(sim)* was checked by direct simulation; nothing here is proved.
+Everything below marked *(sim)* was checked by direct simulation; apart from the Rocq files, nothing here is proved.
+
+**Where things stand (short version).**
+
+* *Proved in Rocq* (`rocq/`, only the framework's `functional_extensionality_dep`): the timer and counter lemmas of
+  `SBCv9.v` ported to this machine (`a` odd), every carry sweep as a lemma (30 stop windows, an abnormal return mode,
+  digit and absorb lemmas), the carry total on every word, and `holdout_nonhalt_of_no_bad`: if the list machine
+  `stepL` started from `LL 5 5 [1;0]` never reaches `b = 0` with a word that starts with none of `101`, `11`, `00`,
+  then `~ halts holdout c0`.
+* *Checked by simulation*: the real run (and the exact models of it) to phase 29,438 with no bad overflow, and the
+  low end predicted to phase 1,316,154; at every excursion the run next to the bottom is long (hundreds or more
+  after the first few hundred phases).
+* *Open*: the global statement. A bad overflow needs a short run (in the one tested pattern, `A` even, `B` odd, `C`
+  odd and `D = 3`) next to the bottom at an excursion. Run lengths come out of a deterministic but pseudo-random
+  wave process, and with a random counter the model hits a bad overflow within 80 phases every time. No invariant
+  is known; heuristically a halt is very unlikely.
 
 | state | read 0 | read 1 |
 |---|---|---|
