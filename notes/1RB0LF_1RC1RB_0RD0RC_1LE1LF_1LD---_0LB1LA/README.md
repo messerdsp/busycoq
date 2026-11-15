@@ -431,9 +431,13 @@ macro step run the machine). At the states just before 14,609 and 20,595, with `
 passes and stays single. With the same parities `D = 2` and `D = 4` do not halt (the 4 becomes 3 and merges with
 `E`), and `D >= 5` is swallowed by the new bottom. The `D = 3` case halts for every `E` tried (2, 3, 60, 61, 64, 100)
 and for other sizes of `A, B, C` (`32, 43, 53` and `28, 13, 9`). A short `C` (1 to 7) does not halt with `A` odd, or
-with `A` and `B` even (28 + 14 cases at 20,592). So the remaining proof task is about one pattern: show that no
-excursion has `A` even, `B` odd, `C` odd and `D = 3` (and that no other short pattern halts; only the cases above
-were tried).
+with `A` and `B` even (28 + 14 cases at 20,592). Two short runs together (`C, D` in 1..6 with `A = 30, B = 41`;
+`C, D` in 1..5 with `A = 31`, `B = 40, 41`; 86 cases): with `A` even only `C = 3, D = 3` and `C = 5, D = 3` halt (the
+same route, `C` odd); with `A` odd only `B = 40, C = 2, D = 1` and `B = 41, C = 3, D = 1`. No run of length 1 occurs
+at any phase start in the data (the lowest 24 runs at every phase to 29,438, and the full tapes at 10,000, 14,700
+and 15,000), so those two need a configuration that does not seem to occur. So the remaining proof task is about
+one pattern: show that no excursion has `A` even, `B` odd, `C` odd and `D = 3` (and that runs of 1 never appear,
+and no other short pattern halts; only the cases above were tried).
 
 **How close the real run comes.** The four runs above the bottom at each excursion (real run to 10,000, then the
 predictor), the number absorbed by the new bottom, and the shortest of the first 11 runs:
@@ -507,7 +511,8 @@ itself (t1 `0110`, `0111`) with that parse state's pass. With the four digit lem
 `0000 -> 0110`, `0011 -> 0111`, `00 -> 10`) and `0 -> 1` for the sweep after an overflow, `carry_spec` says: if
 the function `carry` succeeds on `r`, the machine does that sweep. `mstep2` uses only these (no simulation), and
 `reach13000_rules` runs it from the blank tape: all 13,000 macro steps succeed, so on that stretch every sweep is
-one of these 21 lemmas.
+one of these 21 lemmas. In Python (`phase_sim/carrycheck.py`, the same `carry` against the machine's sweeps) every
+sweep from the blank tape to phase 1,500 is covered, and the pure model above covers 10,000 to 29,438.
 
 `rocq/M9Reduce.v` turns this into a reduction. It restates the macro steps with `-->+` (each takes at least one
 machine step), gives the macro step `mstepG T` the fuel `T` as a parameter (a fixed fuel runs out once the tape is
