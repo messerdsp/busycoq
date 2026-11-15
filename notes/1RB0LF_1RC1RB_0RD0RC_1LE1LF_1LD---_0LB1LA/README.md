@@ -476,8 +476,8 @@ slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
 1. *The per-phase part* (looks routine). The timer lemmas of `SBCv9.v` under `a` odd (and `a = 3 mod 4` by a
    trivial induction), the digit arithmetic (`rest`, `RIncs`, as upstream), the 13 carry rules and the 2 bookkeeping
    sweeps as Rocq lemmas, and a local invariant on `r` (gap and run shapes) showing that every carry sweep meets one
-   of the 13 windows. All of this is checked by simulation. In Rocq so far (`rocq/`): the timer lemmas and the
-   counter arithmetic (below); the carry rules and the invariant are not done.
+   of the 13 windows. All of this is checked by simulation. In Rocq so far (`rocq/`): the timer lemmas, the
+   counter arithmetic, and the carry rules as lemmas (below); the invariant is not done.
 2. *The global part* (open, and possibly as hard as a cryptid). At every excursion, the run next to the bottom is at
    least 5. The pieces known: below the top, runs are created only as transient 2s inside a wave; each wave passes every run once, and leaves it either
    merged (length at least the sum plus 2) or single, changed by -3 to +3 in the data, depending on parities and the wave's
@@ -496,8 +496,18 @@ the timer is written `0inf <* [1] <* [1;1]^^k <* <[1;0]^^b` (`a = 2k + 1`). With
 arithmetic (`rest`, `RIncs`, `RIncs_spec`) is TM2's, unchanged. The macro step `mstep` (sweeps still by bounded
 simulation, as upstream) and `msteps_spec` follow. `M9Run.v` runs it from the blank tape: all 13,000 macro steps
 succeed, and `reach13000 : c0 -->* (that configuration)` is proved, with a counter of 400 bits (past TM2's halt at
-its 374th overflow). Assumptions: only `functional_extensionality_dep`, which the framework's `flip` uses. What is
-missing for a proof is the sweep: the 13 carry rules as lemmas over a general word, and the invariant.
+its 374th overflow). Assumptions: only `functional_extensionality_dep`, which the framework's `flip` uses.
+
+`rocq/M9Carry.v` replaces the simulated sweep by lemmas. A carry sweep never reads past the 8-cell window at the
+parse stop (the head turns inside it), so each of the 13 rules is a `segRLs` fact about a fixed word with an
+arbitrary tail, proved by computation: entering the last digit (t0 `0110`, t0 `0111`, or t1 `10`) or the stop
+itself (t1 `0110`, `0111`) with that parse state's pass. With the four digit lemmas (t0 `0110 -> 0000` and
+`0111 -> 0011`, t1 `10 -> 00`, `11` unchanged), three absorb lemmas (a carry ending in a 0-digit near the top:
+`0000 -> 0110`, `0011 -> 0111`, `00 -> 10`) and `0 -> 1` for the sweep after an overflow, `carry_spec` says: if
+the function `carry` succeeds on `r`, the machine does that sweep. `mstep2` uses only these (no simulation), and
+`reach13000_rules` runs it from the blank tape: all 13,000 macro steps succeed, so on that stretch every sweep is
+one of these 21 lemmas. What is missing for a proof is the invariant (that `carry` always succeeds, on every
+reachable word) and the global part.
 
 ## 7. Reproduce
 
@@ -514,6 +524,7 @@ Rocq (after `make` in `verify/`):
 ```bash
 cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/rocq
 coqc $(cat _CoqProject) M9Timer.v && coqc $(cat _CoqProject) M9Run.v   # M9Run takes about a minute
+coqc $(cat _CoqProject) M9Carry.v                                       # about two minutes
 ```
 
 Phase-level simulation (needs Python 3 and a C compiler):
