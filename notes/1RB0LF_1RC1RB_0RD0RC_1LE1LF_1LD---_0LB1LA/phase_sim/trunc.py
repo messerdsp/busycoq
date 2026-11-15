@@ -1,6 +1,7 @@
 """Locality test: truncate r after N tokens, run K phases, compare low tokens with the full run's dump."""
+import os
 import sys, pickle, time
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from msim import *
 def toks(r):
     out = []; i = 0

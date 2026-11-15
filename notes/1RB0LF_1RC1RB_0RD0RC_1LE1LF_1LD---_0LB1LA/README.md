@@ -370,7 +370,10 @@ change by one of these rules (`|` = the stop):
 | `1111|0111` | `1111|1111` | | | |
 
 Checked cell by cell (whole word, including the low end) against the machine on all 9,160 carry sweeps from phase
-14,700 to 16,000: all equal. The only other sweep in a quiet phase is the one after an overflow, and it only sets
+14,700 to 16,000: all equal. Every rule except `1110|0001` removes exactly one run: two runs merge across a gap of 1 (or a run
+of 2 is erased, `0110|0001`). `1110|0001` instead turns a gap of 4 into a gap of 3 (one cell off the run below, two
+onto the run above). So no carry creates a run; new runs appear only at the top, and a run's index counted from
+the bottom never increases. The only other sweep in a quiet phase is the one after an overflow, and it only sets
 `r[0] = 1`. So between excursions the machine is exactly: binary addition on a digit word that stops at blocks, plus
 the 13 rules. At an excursion there is one more sweep (after the `R11` step), and it only clears the two cells left
 of `r` and sets `r[0] = 1`. `model9.py` simulates the machine this way, without running any machine sweep; with
@@ -400,9 +403,15 @@ A\B    1    2    3    4    5    6    7    8    9   10 2235 2236
 ```
 
 So a run of length 5 or more next to the bottom is always safe, and lengths 2 to 4 can halt (3 and 4 almost
-always). The halt is real: the machine ends in `G` reading a 1. With the model above, a non-halting proof needs
-exactly one more fact: at every excursion the run next to the bottom has length 1 or at least 5. The parity of `A`
-also decides how many runs the bottom absorbs (odd `A`: 2, even `A`: 3, from the same grid run).
+always). The halt is real: the machine ends in `G` reading a 1. The parity of `A` also decides how many runs the
+bottom absorbs (odd `A`: 2, even `A`: 3, from the same grid run).
+
+The same grid just before the excursions at 3,321, 4,866 and 20,595 (`haltgrid2.py`: the predictor is run to the
+phase where the bottom run is 4; the early ones start from phase 600): `A >= 5` never halts in any of the four
+contexts, and `A = 2..4` can halt in all of them. The exact cells inside `2..4` vary (at 20,595, `A = 2, B = 5`
+halts; at 4,866, `A = 4, B = 1` halts), and `A = 1` is not always safe: at 4,866 it halts with `B = 4` or `5`. So the
+fact a proof needs is: at every excursion the run next to the bottom is at least 5 (or 1 with the run after it not
+4 or 5).
 
 **The one route to a halt** (`phase_sim/excgrid.py`). Same state (phase 14,606), now with the four runs above the
 bottom set to lengths 21 to 61 of every parity combination. In 12 of 16 parity patterns the bottom absorbs 2 runs
@@ -475,6 +484,11 @@ python3 check_lemmas.py          # timer lemmas on this machine (ok for odd a); 
 python3 check_rincs.py           # RIncs vs single sweeps
 python3 run37.py out 10000       # the real run: out.log (per phase), out.low (lowest runs per phase), out.ckpt
 python3 excursions.py out.low     # the excursion table above
+gcc -O3 -shared -fPIC -o libparsestop.so parsestop.c
+JUMP=1 FILL=10 python3 lowsim.py data/state10000.txt.gz 2000 2200 1400000 pred   # predicted excursions
+STRICT=1 python3 fullmodel.py data/state14700.txt.gz 20000 full 5000   # exact full tape, 13-rule model, no machine sweeps
+python3 haltgrid2.py data/state14700.txt.gz 20580                     # halting grid just before the 20,595 excursion
+python3 routeone.py data/state14700.txt.gz 20580 30,41,51,3,61        # the D = 3 route: halts at the next excursion
 ```
 
 Analysis by messerdsp, with Claude Opus 5.5.

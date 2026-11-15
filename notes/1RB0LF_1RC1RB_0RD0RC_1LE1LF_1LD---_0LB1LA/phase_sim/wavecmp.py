@@ -1,5 +1,5 @@
 import sys, os, pickle
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import toks
 from align import align
 from lowsim import load_state

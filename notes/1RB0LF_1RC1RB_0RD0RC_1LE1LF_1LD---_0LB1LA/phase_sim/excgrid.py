@@ -2,7 +2,7 @@
 record: how many runs the new bottom absorbs and whether the next run (future A) is a merged block or one old run."""
 import os, sys, itertools, random
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 from align import align
 st = load_state(sys.argv[1]); PRE = int(sys.argv[2]); rnd = random.Random(5)

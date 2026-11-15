@@ -2,7 +2,7 @@
 bottom bookkeeping). Compares the predicted word with the real sweep, cell by cell above the low end."""
 import os, sys, ctypes, collections
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, trunc_state
 from wavestate import _lib, LL
 RULE = {'1110|1100': '1111|1100', '1110|1111': '1111|1111', '0110|1100': '0011|1100', '1110|0001': '1100|0111',

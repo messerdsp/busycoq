@@ -1,8 +1,9 @@
 """Exact position of the lowest wave: the cell where the digit parse of r stops, its token, the cell offset in that
 token, the parse mode there, and d = digits parsed - v2(b + 3)."""
+import os
 import ctypes
 LL = ctypes.c_longlong
-_lib = ctypes.CDLL('/home/user/m9/libparsestop.so')
+_lib = ctypes.CDLL(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libparsestop.so'))
 _lib.parse_stop.restype = LL
 _lib.parse_stop.argtypes = [ctypes.c_void_p, LL, LL, ctypes.c_int, ctypes.POINTER(LL), ctypes.POINTER(ctypes.c_int)]
 def wave_state(m):

@@ -4,7 +4,7 @@ one sweep, and record the local result. A sweep is the machine itself (no counte
 usage: sweepexp.py STATE P0 P1 OUT"""
 import os, sys, itertools, pickle, random
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 from wavestate import wave_state, locate
 from msim import Halted, Stuck

@@ -4,7 +4,7 @@ phase, and record the outcome. Then check: is the outcome a function of (phase p
 tokens around the front, the 4 parities)?   usage: tabfront.py STATE P0 P1 OUT"""
 import os, sys, itertools, collections, pickle, random
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 from align import align
 st = load_state(sys.argv[1]); P0, P1 = int(sys.argv[2]), int(sys.argv[3]); OUT = sys.argv[4]

@@ -1,7 +1,7 @@
 """What do the other sweeps (after OV, after R11) do? Report changed cell ranges relative to the parse stop / start."""
 import os, sys, ctypes, collections
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, trunc_state
 st = load_state(sys.argv[1]); P0, P1 = int(sys.argv[2]), int(sys.argv[3])
 m = trunc_state(st['a'], st['b'], st['r'], st['mode'], st['nov'], 700, 900)

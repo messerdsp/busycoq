@@ -1,6 +1,6 @@
 import os, sys, time
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lowsim
 from lowsim import load_state, toks, cells, fill
 from model9 import Model

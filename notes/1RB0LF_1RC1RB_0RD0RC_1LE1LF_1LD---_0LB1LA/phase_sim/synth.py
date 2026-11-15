@@ -3,7 +3,7 @@ them, and record per old gap whether it was filled (joined) and how far it moved
 usage: synth.py STATE SEED NRUNS PHASES LO HI > out"""
 import os, sys, random
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 st = load_state(sys.argv[1]); seed, NR, PH, LO, HI = map(int, sys.argv[2:7]); rnd = random.Random(seed)
 N0 = 120 + 2 * NR + 200; K = N0 + 200

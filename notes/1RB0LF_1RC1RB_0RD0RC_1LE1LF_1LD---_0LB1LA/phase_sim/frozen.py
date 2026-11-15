@@ -1,6 +1,7 @@
 """From a checkpoint, run K phases and report which run indices ever change (the frozen low region)."""
+import os
 import sys, pickle
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from msim import *
 st = pickle.load(open(sys.argv[1], 'rb')); K = int(sys.argv[2])
 m = M(T37, st['a'], st['b'], st['r']); m.mode = st['mode']; m.nov = st['nov']

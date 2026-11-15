@@ -3,7 +3,7 @@ local rule at the stop; the sweep after an overflow sets r[0] = 1. Any other swe
 is counted. With CHECK=1 every modelled sweep is also run on the machine and compared cell by cell."""
 import os, sys, ctypes, collections
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from msim import M
 from wavestate import _lib, LL
 RULE = {'1110|1100': '1111|1100', '1110|1111': '1111|1111', '1110|1110': '1111|1110', '1110|1101': '1111|1101',
@@ -11,6 +11,7 @@ RULE = {'1110|1100': '1111|1100', '1110|1111': '1111|1111', '1110|1110': '1111|1
         '0110|1100': '0011|1100', '0110|1111': '0011|1111', '0110|1110': '0011|1110', '0110|1101': '0011|1101',
         '0110|0001': '0000|0111',
         '0111|0110': '0011|1110', '1111|0110': '1111|1110', '1111|0111': '1111|1111'}
+RULEB = {k: bytes(int(c) for c in v.replace('|', '')) for k, v in RULE.items()}
 _lib.zero_digits.restype = ctypes.c_int
 _lib.zero_digits.argtypes = [ctypes.c_void_p, LL, LL, ctypes.c_int]
 def zero_digits(B, i, stop):
@@ -47,6 +48,11 @@ class Model(M):
         if self.last == 'INC1':
             sc = self.stop_cell(); key = ''.join(map(str, self.buf[sc - 4:sc])) + '|' + ''.join(map(str, self.buf[sc:sc + 4]))
             if key in RULE:
+                if not self.check:      # fast path: rewrite in place
+                    zero_digits(self.buf, o, sc)
+                    self.buf[sc - 4:sc + 4] = RULEB[key]; self.stats['carry'] += 1
+                    if self.buf[self.hi:self.hi + 8].count(1): self.hi += 8
+                    return
                 pred = bytearray(self.buf); zero_digits(pred, o, sc)
                 pred[sc - 4:sc + 4] = bytes(int(c) for c in RULE[key].replace('|', ''))
                 kind = 'carry'

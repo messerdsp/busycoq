@@ -3,7 +3,7 @@ above bit K so every phase still delivers its carries). Influence only goes up (
 low tokens are exact as long as N, K are well above what is logged.
 usage: lowsim.py (CKPT | start:PHASE) N K MAXPH OUT [LOWN]"""
 import sys, pickle, time, os
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from msim import *
 def toks(r):
     out = []; i = 0

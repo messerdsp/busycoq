@@ -1,7 +1,8 @@
 """Run-length Turing machine simulator with chain steps (a whole run crossed at once when the machine walks
 through it without changing state). Tape: left and right stacks of [sym, count] runs, nearest run last."""
+import os
 import sys
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from m9 import T37
 class Halt(Exception): pass
 def push(stack, sym, n):

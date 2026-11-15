@@ -1,7 +1,7 @@
 """Fixed tape, one phase: which single-bit flips of b change the low tokens after the phase?"""
 import os, sys
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 st = load_state(sys.argv[1]); AH = int(sys.argv[2]); J0, J1 = int(sys.argv[3]), int(sys.argv[4])
 N, K = 700, 900

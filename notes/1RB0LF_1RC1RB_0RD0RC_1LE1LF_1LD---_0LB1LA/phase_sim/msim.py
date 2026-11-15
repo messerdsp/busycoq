@@ -25,6 +25,7 @@ lib.parse_digits.restype = LL
 lib.parse_digits.argtypes = [ctypes.c_void_p, LL, LL, ctypes.c_int, ctypes.c_void_p, LL, ctypes.POINTER(ctypes.c_int)]
 lib.add_digits.restype = LL
 lib.add_digits.argtypes = [ctypes.c_void_p, LL, ctypes.c_int, ctypes.c_void_p, LL]
+_T01 = bytes.maketrans(b'\x00\x01', b'01'); _T10 = bytes.maketrans(b'01', b'\x00\x01')
 class Halted(Exception): pass
 class Stuck(Exception): pass
 
@@ -95,9 +96,9 @@ class M:
         del cb, co
         if nb < 0: raise Stuck('too many digits')
         if tail.value: return INF
-        return int(''.join('1' if out[j] else '0' for j in range(nb - 1, -1, -1)) or '0', 2)
+        return int(bytes(out[nb - 1::-1]).translate(_T01) or b'0', 2) if nb else 0
     def rincs(self, k, tp=1):
-        kb = bytes((k >> j) & 1 for j in range(k.bit_length())) if k < (1 << 4096) else bytes(int(c) for c in bin(k)[2:][::-1])
+        kb = bin(k)[:1:-1].encode().translate(_T10) if k else b''
         B = self.buf; cb = (ctypes.c_uint8 * len(B)).from_buffer(B)
         kbb = bytearray(kb) or bytearray(1); ck = (ctypes.c_uint8 * len(kbb)).from_buffer(kbb)
         e = lib.add_digits(ctypes.addressof(cb), self.off, tp, ctypes.addressof(ck), len(kb))

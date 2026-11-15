@@ -1,7 +1,7 @@
 """Run the real machine from the configuration where the macro model gets stuck (b = 0, prefix not 00)."""
 import os, sys
 os.environ.setdefault('FILL', '10')
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 from msim import Stuck
 from rlesim import run, Halt, push

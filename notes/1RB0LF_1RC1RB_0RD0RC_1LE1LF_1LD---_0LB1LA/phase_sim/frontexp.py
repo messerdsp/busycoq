@@ -1,7 +1,8 @@
 """Vary the runs at the lowest wave front of a real state and run one phase; report how the outcome depends on
 the run lengths. usage: frontexp.py STATE PHASES_AHEAD NRUNS VALUES (e.g. 5,6,7,8,105,106)"""
+import os
 import sys, itertools, collections
-sys.path.insert(0, '/home/user/m9')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lowsim import load_state, toks, cells, trunc_state
 from align import align
 st = load_state(sys.argv[1]); AH = int(sys.argv[2]); NR = int(sys.argv[3]); VALS = [int(v) for v in sys.argv[4].split(',')]; OFF = int(sys.argv[5]) if len(sys.argv) > 5 else 0
