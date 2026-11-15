@@ -76,6 +76,14 @@ wall on (1692485, 423118, ...). From then on (to 10^18) the cascade stays frozen
 10^18 its walls hold 182230022, 45557506, 11389372, ... words (`data/skel_to_1e18.txt.gz`; the round starts every
 20,000 rounds to 4·10^15 are in `data/skel_to_4e15.txt.gz`).
 
+**What triggers it** (`data/end_events_to_1.37e15.txt.gz`: the end of the tape, right of the last wall of 40 or
+more words, at every round start where it changes; `ENDT=40`). From 2·10^8 to 2.6·10^14 the tape ends in the same
+34-block word `T`; units are born just left of it and their walls grow until they leave the region. At step
+263,252,731,346,449 `T` itself is rewritten and the tape ends in a wall of 3 words followed by 5 blocks (`3 [5]`).
+That ending is still there when the overflow starts at 1.37·10^15: the next carry to pass it reaches the blank tape
+at the right end. The event at 1.94·10^8 reported by the busy-beaver-explorer notes is of the same kind (the end
+`34 [10] 5 [10]` becomes `3 [17] 15 [33]` within one round), on a much smaller scale.
+
 ## 4. Automatic deciders (negative)
 
 From the configuration at step 2·10^8 (busycoq's `CPS_LRU` and `RWL_mod` take a simulation prefix), with
@@ -88,7 +96,8 @@ the cascade are the likely reason: no small set of local patterns describes them
 1. The counter: round lemmas for a unit in each phase, with and without a carry (the block rules above cover the
    single moves).
 2. Births at the end of the chain, next to the fixed tail.
-3. The overflow: what triggers it, and the cascade it writes, as a rule for a chain of any length.
+3. The overflow: when the end of the tape stops absorbing carries (section 3), and the cascade it writes, as a
+   rule for a chain of any length.
 4. An invariant on the family of tapes this produces (chains, frozen cascades, leftover words) that excludes
    `1 0 0 0 0 B> 1`, plus the start up to step 2·10^8 by computation.
 
@@ -100,6 +109,7 @@ Step 3 is the new hard part; with the simulator it can be studied on the second 
 cd notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/tools
 gcc -O2 -o chainb chainb.c && gcc -O2 -o dump dump.c && gcc -O2 -o samp samp.c
 SKEL=1 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 4e15 -20000 skel.txt        # the overflow (seconds)
+ENDT=40 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 1.3689e15 -100000000000 - > end.txt   # end of the tape
 SKEL=1 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 2.487e15 -1 - | awk '$1>1.3e15 {if ($1-p>1e10) {print pl; print} p=$1; pl=$0}'   # the two trips
 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 1e18 3000000 e18.txt                # to 10^18 (large output)
 ./samp 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 200000000 260000000 1 ev.txt && python3 units.py ev.txt   # section 1

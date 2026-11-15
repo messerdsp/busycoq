@@ -7,6 +7,7 @@
 //   EVERY = 0: print when the pattern of the rightmost NB (25) runs changes
 //   EVERY < 0: print every |EVERY|-th round start (first left-end event after the head was away)
 //   env SKEL=1: print a skeleton instead of the tape: runs of >= 3 equal blocks as counts, [n] = n blocks between
+//   env ENDT=T: at round starts, print the end region (runs right of the last run of >= T blocks) when it changes
 // build: gcc -O2 -o chainb chainb.c
 #include <stdint.h>
 #include <stdio.h>
@@ -80,6 +81,19 @@ int main(int argc, char **argv) {
             s = x->ns; dr = x->exitR;
         }
         static int away = 1;
+        if (getenv("ENDT") && !dr && L.len == 0 && away) {     // at round starts: print the end region when it changes
+            static long T = 0; if (!T) T = atol(getenv("ENDT"));
+            static uint32_t pv[4096]; static uint64_t pc[4096]; static long pn = -1;
+            long k = 0; while (k < R.len && R.r[k].n < (uint64_t)T) k++;          // R.r[0] = far right; stop at first big run
+            int d = k != pn; for (long i = 0; i < k && !d; i++) d = pv[i] != R.r[i].b || pc[i] != R.r[i].n;
+            if (d && k < 4096) {
+                for (long i = 0; i < k; i++) { pv[i] = R.r[i].b; pc[i] = R.r[i].n; } pn = k;
+                pr128(out, steps); fprintf(out, " %c", 'A' + s);
+                if (k < R.len) fprintf(out, " W%llu", (unsigned long long)R.r[k].n);
+                for (long i = k - 1; i >= 0; i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
+                fputc('\n', out); fflush(out);
+            }
+        }
         if (!(!dr && L.len == 0)) away = 1;
         if (EVERY < 0 && !dr && L.len == 0) {          // round starts only: first left-end macro step after being away
             if (away && ev++ % (-EVERY) == 0) {
