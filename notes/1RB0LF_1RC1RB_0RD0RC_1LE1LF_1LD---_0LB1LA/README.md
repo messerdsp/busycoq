@@ -332,7 +332,8 @@ are a deterministic carry and could favour some patterns.
 **Run lineage on the exact tape** (`phase_sim/lineage.py`, `linpos.py`). The exact 13-rule model is run from the
 full tape at phase 15,000; every run gets an id, and each local edit between phase starts gives the new runs as
 parents the old runs whose cells they overlap. A run unchanged for 20 phases is "frozen"; following parents back to
-frozen runs tells, for each wave passage, which old runs became which new run. From 15,000 to 16,500, below run
+frozen runs tells, for each wave passage, which old runs became which new run. The run also saves the exact full state at phase 20,000
+(`data/state20000.txt.gz`; its lowest 24 tokens equal the independent model log at that phase). From 15,000 to 16,500, below run
 index 1,000 (where the 14,609 wave passed): 1,335 old runs became 639 new ones (a factor 2.1); 16% of the old runs
 were left single (14% of the 238 below index 300). The single ones mostly shrink: changes -3, -2, -1, 0, +1..+3 in
 25, 16, 95, 68, 16 cases. Short runs do pass single: `2 -> 3`, `3 -> 3`, `3 -> 2`, `5 -> 2`, `6 -> 4`. Higher up
