@@ -333,7 +333,7 @@ index 1,000 (where the 14,609 wave passed): 1,335 old runs became 639 new ones (
 were left single (14% of the 238 below index 300). The single ones mostly shrink: changes -3, -2, -1, 0, +1..+3 in
 25, 16, 95, 68, 16 cases. Short runs do pass single: `2 -> 3`, `3 -> 3`, `3 -> 2`, `5 -> 2`, `6 -> 4`. Higher up
 (index above 3,000, older waves) about half the old runs are left single. So the per-wave survival and shrinkage
-used in the heuristic below are measured, not assumed, near the bottom; nothing here bounds them.
+used in the heuristic above are measured, not assumed, near the bottom; nothing here bounds them.
 
 **Toward the exact wave rule.** Controlled test (`phase_sim/frontexp.py`): take the real state one phase after
 14,731 (front `o1385 z2 o1273 z3 o909 z3 o8225`), replace the run below the front and the three above it by every
