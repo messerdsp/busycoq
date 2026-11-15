@@ -352,6 +352,34 @@ about -4 on even phases and -1 to 5 on odd ones). The next attempt should derive
 transitions at the cell level (one carry sweep through a gap of 2, 3 or 4 with given parse state and neighbouring run
 parities) instead of from run statistics.
 
+**The wave step at machine level: 13 local rules** (`phase_sim/sweeptab.py`, `swmodel.py`, `model9.py`). Inside a
+phase the counter fills its digits up to the lowest block (`INCS`, exact arithmetic), then one single increment
+(`INC1`) is done by a real machine sweep, which carries into the block; the parse then reads on to the next block,
+and so on. That sweep is the only part not already given as arithmetic, and it turns out to be simple: every digit
+below the block goes from 1 to 0 (`0110 -> 0000`, `0111 -> 0011`, `10 -> 00`), and the 8 cells around the parse stop
+change by one of these rules (`|` = the stop):
+
+| before | after | | before | after |
+|---|---|---|---|---|
+| `1110|1100` | `1111|1100` | | `0110|1100` | `0011|1100` |
+| `1110|1111` | `1111|1111` | | `0110|1111` | `0011|1111` |
+| `1110|1110` | `1111|1110` | | `0110|1110` | `0011|1110` |
+| `1110|1101` | `1111|1101` | | `0110|1101` | `0011|1101` |
+| `1110|0001` | `1100|0111` | | `0110|0001` | `0000|0111` |
+| `0111|0110` | `0011|1110` | | `1111|0110` | `1111|1110` |
+| `1111|0111` | `1111|1111` | | | |
+
+Checked cell by cell (whole word, including the low end) against the machine on all 9,160 carry sweeps from phase
+14,700 to 16,000: all equal. The only other sweep in a quiet phase is the one after an overflow, and it only sets
+`r[0] = 1`. So between excursions the machine is exactly: binary addition on a digit word that stops at blocks, plus
+the 13 rules. At an excursion there is one more sweep (after the `R11` step), and it only clears the two cells left
+of `r` and sets `r[0] = 1`. `model9.py` simulates the machine this way, without running any machine sweep; with
+`CHECK=1` it also runs the machine and compares the whole word after every sweep. From phase 10,000 to 14,700,
+across the excursion at 14,609, all 8,691 modelled sweeps (4,699 after an overflow, 3,991 carries, 1 excursion) are
+equal to the machine's, and the tokens equal the full run's. So the machine is exactly: the timer lemmas of
+`SBCv9.v`, binary addition on the digit word, 13 local carry rules and 2 bookkeeping rules. Each of these is a
+small statement that can be proved once in Rocq (like `RIncs` upstream), which is the per-phase half of a proof.
+
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
