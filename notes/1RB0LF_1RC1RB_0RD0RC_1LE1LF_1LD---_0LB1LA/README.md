@@ -477,7 +477,8 @@ slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
    trivial induction), the digit arithmetic (`rest`, `RIncs`, as upstream), the 13 carry rules and the 2 bookkeeping
    sweeps as Rocq lemmas, and a local invariant on `r` (gap and run shapes) showing that every carry sweep meets one
    of the 13 windows. All of this is checked by simulation. In Rocq so far (`rocq/`): the timer lemmas, the
-   counter arithmetic, and the carry rules as lemmas (below); the invariant is not done.
+   counter arithmetic, the carry rules as lemmas, and the reduction `runs start -> ~ halts holdout c0` (below); the
+   invariant is not done.
 2. *The global part* (open, and possibly as hard as a cryptid). At every excursion, the run next to the bottom is at
    least 5. The pieces known: below the top, runs are created only as transient 2s inside a wave; each wave passes every run once, and leaves it either
    merged (length at least the sum plus 2) or single, changed by -3 to +3 in the data, depending on parities and the wave's
@@ -506,8 +507,22 @@ itself (t1 `0110`, `0111`) with that parse state's pass. With the four digit lem
 `0000 -> 0110`, `0011 -> 0111`, `00 -> 10`) and `0 -> 1` for the sweep after an overflow, `carry_spec` says: if
 the function `carry` succeeds on `r`, the machine does that sweep. `mstep2` uses only these (no simulation), and
 `reach13000_rules` runs it from the blank tape: all 13,000 macro steps succeed, so on that stretch every sweep is
-one of these 21 lemmas. What is missing for a proof is the invariant (that `carry` always succeeds, on every
-reachable word) and the global part.
+one of these 21 lemmas.
+
+`rocq/M9Reduce.v` turns this into a reduction. It restates the macro steps with `-->+` (each takes at least one
+machine step), gives the macro step `mstepG T` the fuel `T` as a parameter (a fixed fuel runs out once the tape is
+long), and defines `runs` coinductively: `runs x` if some fuel gives a step `mstepG T x = Some y` and `runs y`. Then
+
+```
+Theorem holdout_nonhalt_of_runs: runs start -> ~ halts holdout c0.
+```
+
+for `holdout := TM_from_str "1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA"` (through `Perm` for the renaming and
+`flip_halts_c0` for the mirror), with `start := cfgL' 5 5 ([1;0]*>0inf)`. Assumptions: `functional_extensionality_dep`
+only. So a non-halting proof now needs exactly `runs start`: that this explicit function on `(k, b, word)` (timer
+arithmetic, digit addition, `0 -> 1`, and the 21 carry lemmas) never gets stuck. It gets stuck exactly when a
+carry meets a window outside the 21 (the local invariant) or when `b = 0` and the word does not start with `00`,
+`101` or `11` (the halt route of the excursions).
 
 ## 7. Reproduce
 
@@ -525,6 +540,7 @@ Rocq (after `make` in `verify/`):
 cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/rocq
 coqc $(cat _CoqProject) M9Timer.v && coqc $(cat _CoqProject) M9Run.v   # M9Run takes about a minute
 coqc $(cat _CoqProject) M9Carry.v                                       # about two minutes
+coqc $(cat _CoqProject) M9Reduce.v                                      # the reduction theorem
 ```
 
 Phase-level simulation (needs Python 3 and a C compiler):
