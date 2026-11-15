@@ -1,7 +1,8 @@
 # Notes: `1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA`
 
 BB(6) holdout (on the 608 list of 30 Oct 2026; spreadsheet class *Sync bouncer counter*).
-**Status: open.** No Rocq proof here, only analysis notes and tools to reproduce it.
+**Status: open.** No proof here: analysis notes, tools to reproduce them, and the first Rocq lemmas of a
+proof (`rocq/`, section 6).
 Everything below marked *(sim)* was checked by direct simulation; nothing here is proved.
 
 | state | read 0 | read 1 |
@@ -421,8 +422,18 @@ absorb 3 runs and leave the 4th run on its own next to it, unchanged: with `A..D
 `30 + 41 + 51 - 3 = 119` and `61` sits next to it. Had `D` been 2 to 4, the following excursion would halt. So the
 machine halts only if, at some excursion, the bottom takes 3 runs and the run after them is short and is still
 short when the bottom has counted down to it. In the real run that single-run case has happened once in 19
-excursions (445,107, with `D = 65,463`). The remaining proof task is therefore about short runs only: show that no
-run of length 2 to 4 is ever the 4th run above the bottom at such an excursion.
+excursions (445,107, with `D = 65,463`).
+
+End to end (`phase_sim/routeone.py`: set the runs, run through this excursion and the next one, and on a stuck
+macro step run the machine). At the states just before 14,609 and 20,595, with `A = 30, 31`, `B = 40, 41`,
+`C = 50, 51`, `D = 1..8` and `E = 61` (64 cases each), exactly one case halts, the same in both: `A` even, `B` odd,
+`C` odd, `D = 3` (halt about 120 phases later, at the next excursion). There the 3 goes `3 -> 2 -> 3` while the wave
+passes and stays single. With the same parities `D = 2` and `D = 4` do not halt (the 4 becomes 3 and merges with
+`E`), and `D >= 5` is swallowed by the new bottom. The `D = 3` case halts for every `E` tried (2, 3, 60, 61, 64, 100)
+and for other sizes of `A, B, C` (`32, 43, 53` and `28, 13, 9`). A short `C` (1 to 7) does not halt with `A` odd, or
+with `A` and `B` even (28 + 14 cases at 20,592). So the remaining proof task is about one pattern: show that no
+excursion has `A` even, `B` odd, `C` odd and `D = 3` (and that no other short pattern halts; only the cases above
+were tried).
 
 **How close the real run comes.** The four runs above the bottom at each excursion (real run to 10,000, then the
 predictor), the number absorbed by the new bottom, and the shortest of the first 11 runs:
@@ -465,7 +476,8 @@ slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
 1. *The per-phase part* (looks routine). The timer lemmas of `SBCv9.v` under `a` odd (and `a = 3 mod 4` by a
    trivial induction), the digit arithmetic (`rest`, `RIncs`, as upstream), the 13 carry rules and the 2 bookkeeping
    sweeps as Rocq lemmas, and a local invariant on `r` (gap and run shapes) showing that every carry sweep meets one
-   of the 13 windows. All of this is checked by simulation; none of it is formalised yet.
+   of the 13 windows. All of this is checked by simulation. In Rocq so far (`rocq/`): the timer lemmas and the
+   counter arithmetic (below); the carry rules and the invariant are not done.
 2. *The global part* (open, and possibly as hard as a cryptid). At every excursion, the run next to the bottom is at
    least 5. The pieces known: below the top, runs are created only as transient 2s inside a wave; each wave passes every run once, and leaves it either
    merged (length at least the sum plus 2) or single, changed by -3 to +3 in the data, depending on parities and the wave's
@@ -476,6 +488,17 @@ slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
    heuristic above (survival about 10% per wave, about `log_2.3 i` waves from index `i`) makes a halt after phase
    10,000 very unlikely, but it is not a proof.
 
+**Rocq** (`rocq/M9Timer.v`, `rocq/M9Run.v`, against this repository's `verify/`). The machine is written mirrored
+with states renamed so that it lines up with TM2 of `SBCv9.v` (`1LC0RF_1RE---_1LD1LC_0LE0LD_1RB1RF_0RC1RA`).
+TM2's timer lemmas fail here for even `a` (in Rocq, `LInc` goes through at `a = 3` and gets stuck at `a = 4`), so
+the timer is written `0inf <* [1] <* [1;1]^^k <* <[1;0]^^b` (`a = 2k + 1`). With that, `LInc`, `LIncs`, `LOv`,
+`LRst_101`, `LRst_11`, `LRst_10` and `init` are proved with TM2's proof scripts unchanged, and the counter
+arithmetic (`rest`, `RIncs`, `RIncs_spec`) is TM2's, unchanged. The macro step `mstep` (sweeps still by bounded
+simulation, as upstream) and `msteps_spec` follow. `M9Run.v` runs it from the blank tape: all 13,000 macro steps
+succeed, and `reach13000 : c0 -->* (that configuration)` is proved, with a counter of 400 bits (past TM2's halt at
+its 374th overflow). Assumptions: only `functional_extensionality_dep`, which the framework's `flip` uses. What is
+missing for a proof is the sweep: the 13 carry rules as lemmas over a general word, and the invariant.
+
 ## 7. Reproduce
 
 ```bash
@@ -484,6 +507,13 @@ python3 sbc9.py check                                   # self-test against the 
 python3 sbc9.py count 110000000000 30 70                # counter from a small start (section 3)
 gcc -O2 -o samp samp.c && ./samp 1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA 3000000 C 0 R | head -60
 gcc -O2 -o bstat bstat.c && ./bstat 1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA 1000000000
+```
+
+Rocq (after `make` in `verify/`):
+
+```bash
+cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/rocq
+coqc $(cat _CoqProject) M9Timer.v && coqc $(cat _CoqProject) M9Run.v   # M9Run takes about a minute
 ```
 
 Phase-level simulation (needs Python 3 and a C compiler):
