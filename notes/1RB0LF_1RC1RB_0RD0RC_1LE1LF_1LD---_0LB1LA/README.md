@@ -372,8 +372,9 @@ change by one of these rules (`|` = the stop):
 Checked cell by cell (whole word, including the low end) against the machine on all 9,160 carry sweeps from phase
 14,700 to 16,000: all equal. Every rule except `1110|0001` removes exactly one run: two runs merge across a gap of 1 (or a run
 of 2 is erased, `0110|0001`). `1110|0001` instead turns a gap of 4 into a gap of 3 (one cell off the run below, two
-onto the run above). So no carry creates a run; new runs appear only at the top, and a run's index counted from
-the bottom never increases. The only other sweep in a quiet phase is the one after an overflow, and it only sets
+onto the run above). So the rules never create a run. The filling between carries can, though: near a wave, a
+gap of 7 holds a run of 2 on some phase starts and not on others (`z7` becomes `z2 o2 z3`, and the 2 is erased
+again later), so at phase starts runs do appear below the top, but only as these 2s inside a wave. The only other sweep in a quiet phase is the one after an overflow, and it only sets
 `r[0] = 1`. So between excursions the machine is exactly: binary addition on a digit word that stops at blocks, plus
 the 13 rules. At an excursion there is one more sweep (after the `R11` step), and it only clears the two cells left
 of `r` and sets `r[0] = 1`. `model9.py` simulates the machine this way, without running any machine sweep; with
@@ -459,10 +460,21 @@ and from phase 10,000 with `N = 2,500` its first 300 tokens equal the full run's
 from 10,001 to 14,620; with `N = 2,000` it gives the same first four excursions as the
 slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
 
-**What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
-what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
-reaches 2. The timer side is done: the `SBCv9.v` lemmas carry over under `a` odd, and `a` is odd by a trivial
-induction.
+**What a proof still needs.** Two parts, of very different difficulty.
+
+1. *The per-phase part* (looks routine). The timer lemmas of `SBCv9.v` under `a` odd (and `a = 3 mod 4` by a
+   trivial induction), the digit arithmetic (`rest`, `RIncs`, as upstream), the 13 carry rules and the 2 bookkeeping
+   sweeps as Rocq lemmas, and a local invariant on `r` (gap and run shapes) showing that every carry sweep meets one
+   of the 13 windows. All of this is checked by simulation; none of it is formalised yet.
+2. *The global part* (open, and possibly as hard as a cryptid). At every excursion, the run next to the bottom is at
+   least 5. The pieces known: below the top, runs are created only as transient 2s inside a wave; each wave passes every run once, and leaves it either
+   merged (length at least the sum plus 2) or single, changed by -3 to +3 in the data, depending on parities and the wave's
+   offset; an excursion's cascade swallows short runs near the bottom except in narrow cases (the `D = 3` route
+   above). So a halt needs a run born at the top to stay unmerged through every wave down to the bottom and end at
+   length 3 (or 2 to 4) in the one slot that is not swallowed. Nothing found so far rules this out deterministically:
+   whether a run is left single depends on run parities and the wave offset, which look pseudo-random. The
+   heuristic above (survival about 10% per wave, about `log_2.3 i` waves from index `i`) makes a halt after phase
+   10,000 very unlikely, but it is not a proof.
 
 ## 7. Reproduce
 
