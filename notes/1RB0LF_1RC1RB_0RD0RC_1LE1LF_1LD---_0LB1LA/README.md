@@ -549,7 +549,14 @@ Theorem holdout_nonhalt_of_no_bad:
 Assumptions: `functional_extensionality_dep` only. A bad configuration is not always a halt (simulated from a few
 bad ones, some halt within a few thousand steps and some do not, depending on `k`), so this is one direction
 only, which is the one a non-halting proof needs. Run from the start in Rocq, `stepL` takes 200,000 steps (to
-`b = 7,532`) without reaching a bad overflow. What remains is exactly the global statement: the list machine never
+`b = 7,532`) without reaching a bad overflow. `stepL` applies the timer resets (`101`, `11`) only at `b = 0`, while
+TM2's order (the Python model) applies them whenever the word starts that way, which happens at excursions with
+`b > 0`. Both are proved lemmas from the same configuration (in a direct check the machine passes through the
+`LInc` end point first and the `LRst_11` end point later in the same sweep), so both orders are sound, but their
+checkpoints differ. `phase_sim/steplorder.py` runs the Python model in `stepL`'s order: from the blank tape to
+phase 400 (excursions 91, 119, 215) and from phase 10,000 to 21,000 (excursions 14,609 and 20,595) it never
+reaches a bad overflow, and its phase-start words equal the real run's (phases 398 to 400) and the predictor's
+(phase 21,000). What remains is exactly the global statement: the list machine never
 reaches `b = 0` with a word that starts with none of `101`, `11`, `00`.
 
 The two parts behave very differently (`phase_sim/randb.py`): run the same macro model from the blank tape but
