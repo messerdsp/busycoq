@@ -15,8 +15,8 @@ Everything below marked *(sim)* was checked by direct simulation; apart from the
   `stepL` started from `LL 5 5 [1;0]` never reaches `b = 0` with a word that starts with none of `101`, `11`, `00`,
   then `~ halts holdout c0`.
 * *Checked by simulation*: the real run (and the exact models of it) to phase 29,438 with no bad overflow, and the
-  low end predicted to phase 1,011,350 (and the phase of the next excursion, 1,402,241); at every excursion the run next to the bottom is long (hundreds or more
-  after the first few hundred phases).
+  low end predicted to phase 4,000,000 (excursions at 1,402,241 and 2,413,709, none after it up to 4,000,000); at every
+  excursion the run next to the bottom is long (hundreds or more after the first few hundred phases).
 * *Open*: the global statement. A bad overflow needs a short run (in the one tested pattern, `A` even, `B` odd, `C`
   odd and `D = 3`) next to the bottom at an excursion. Run lengths come out of a deterministic but pseudo-random
   wave process, and with a random counter the model hits a bad overflow within 80 phases every time. No invariant
@@ -309,14 +309,22 @@ excursion. Checks:
 | 326,345 | 82,349 | 118,753 | N = 1000, 1300, 2000 |
 | 445,107 | 201,658 | 410,262 | N = 1000, 1300, 2000 |
 | 855,378 | 65,463 | 155,963 | N = 1300, 2000 (N = 1000 differs here) |
-| 1,011,350 | 219,297 | | N = 2000; from phase 15,000 N = 2500, 3000 (runs after it differ, see below) |
-| 1,402,241 | 364,948 or 522,086 | | from phase 15,000: N = 2500 and 3000 agree on the phase only |
+| 1,011,350 | 219,297 | | N = 2000; from phase 15,000 N = 2500, 3000; from phase 20,000 N = 3000, 4000, 5000 |
+| 1,402,241 | 904,977 | | from phase 20,000: N = 3000, 4000, 5000 (the phase 15,000 runs: artifacts, see below) |
+| 2,413,709 | 1,431,726 | | from phase 20,000: N = 4000, 5000 (N = 3000 differs) |
 
 Correction (from the exact full tape at phase 15,000, `data/state15000.txt.gz` from `fullmodel.py`, with `N = 2,500` and
 `3,000`): both runs reproduce every excursion above through 855,378 with the same four runs, and at 1,011,350 they
 agree on `A, B, C = 219,297, 171,592, 78,245` (`D` = 244,131 or 443,838). The `N = 2,000` run from phase 10,000
 had `B, C, D = 80,185, 485, 589` there, and its next three excursions (1,310,834, 1,313,118, 1,316,154, with runs
 of a few hundred) were artifacts of too little information: from phase 15,000 the next excursion is at 1,402,241.
+
+From the exact tape at phase 20,000 (`data/state20000.txt.gz`) with the C port, `N = 3,000`, `4,000` and `5,000`, to
+phase 4,000,000: all three reproduce every excursion above through 1,011,350, where they agree on `D = 773,399` (so
+the phase 15,000 values of `D` were artifacts too); at 1,402,241 they agree on `A, B = 904,977, 106,489` (the phase
+15,000 runs had 364,948 or 522,086 for `A`); at 2,413,709 `N = 4,000` and `5,000` agree on `A = 1,431,726` (`B` =
+202,116 or 1,125,999), and neither finds another excursion up to phase 4,000,000 (the bottom run there is about
+1.6 million long). `N = 3,000` differs from 1,402,241 on, and its excursions after 2,413,709 are artifacts.
 
 No short run (length <= 4) next to the bottom in this range. The horizon is limited by information, not by
 speed: an excursion merges many runs into the new bottom (`201,658 -> 410,262`), so a few hundred tokens are
@@ -508,7 +516,9 @@ predictor), the number absorbed by the new bottom, and the shortest of the first
 | 326,345 | 82,349 | 36,411 | 89,522 | 44,351 | 2 | 36,411 |
 | 445,107 | 201,658 | 49,627 | 158,981 | 65,463 | 3 | 35,305 |
 | 855,378 | 65,463 | 90,507 | 134,142 | 85,152 | 2 | 60,536 |
-| 1,011,350 | 219,297 | 171,592 | 78,245 | 244,131 or 443,838 | 2 | |
+| 1,011,350 | 219,297 | 171,592 | 78,245 | 773,399 | 2 | |
+| 1,402,241 | 904,977 | 106,489 | | | | |
+| 2,413,709 | 1,431,726 | | | | | |
 
 The closest call is phase 89, with a 3 as the third run (absorbed safely). After the first few hundred phases the runs
 near the bottom are hundreds to hundreds of thousands long. Three runs were absorbed at 445,107 (A even, B odd, as
