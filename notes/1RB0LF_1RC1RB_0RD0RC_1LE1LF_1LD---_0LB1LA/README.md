@@ -401,6 +401,16 @@ always). The halt is real: the machine ends in `G` reading a 1. With the model a
 exactly one more fact: at every excursion the run next to the bottom has length 1 or at least 5. The parity of `A`
 also decides how many runs the bottom absorbs (odd `A`: 2, even `A`: 3, from the same grid run).
 
+**The one route to a halt** (`phase_sim/excgrid.py`). Same state (phase 14,606), now with the four runs above the
+bottom set to lengths 21 to 61 of every parity combination. In 12 of 16 parity patterns the bottom absorbs 2 runs
+and the run left next to it is a joined block (so at least 5: safe). When `A` is even and `B` odd, the bottom can
+absorb 3 runs and leave the 4th run on its own next to it, unchanged: with `A..D = 30, 41, 51, 61` the new bottom is
+`30 + 41 + 51 - 3 = 119` and `61` sits next to it. Had `D` been 2 to 4, the following excursion would halt. So the
+machine halts only if, at some excursion, the bottom takes 3 runs and the run after them is short and is still
+short when the bottom has counted down to it. In the real run that single-run case has happened once in 19
+excursions (445,107, with `D = 65,463`). The remaining proof task is therefore about short runs only: show that no
+run of length 2 to 4 is ever the 4th run above the bottom at such an excursion.
+
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
