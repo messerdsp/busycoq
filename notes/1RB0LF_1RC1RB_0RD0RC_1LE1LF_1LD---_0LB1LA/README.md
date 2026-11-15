@@ -13,7 +13,7 @@ Everything below marked *(sim)* was checked by direct simulation; apart from the
   `stepL` started from `LL 5 5 [1;0]` never reaches `b = 0` with a word that starts with none of `101`, `11`, `00`,
   then `~ halts holdout c0`.
 * *Checked by simulation*: the real run (and the exact models of it) to phase 29,438 with no bad overflow, and the
-  low end predicted to phase 1,316,154; at every excursion the run next to the bottom is long (hundreds or more
+  low end predicted to phase 1,011,350 (and the phase of the next excursion, 1,402,241); at every excursion the run next to the bottom is long (hundreds or more
   after the first few hundred phases).
 * *Open*: the global statement. A bad overflow needs a short run (in the one tested pattern, `A` even, `B` odd, `C`
   odd and `D = 3`) next to the bottom at an excursion. Run lengths come out of a deterministic but pseudo-random
@@ -290,10 +290,14 @@ excursion. Checks:
 | 326,345 | 82,349 | 118,753 | N = 1000, 1300, 2000 |
 | 445,107 | 201,658 | 410,262 | N = 1000, 1300, 2000 |
 | 855,378 | 65,463 | 155,963 | N = 1300, 2000 (N = 1000 differs here) |
-| 1,011,350 | 219,297 | 299,475 | N = 2000 only (N = 1300 differs here) |
-| 1,310,834 | 1,077 | 2,275 | N = 2000 only |
-| 1,313,118 | 2,287 | 3,027 | N = 2000 only |
-| 1,316,154 | 1,497 | 3,107 | N = 2000 only |
+| 1,011,350 | 219,297 | | N = 2000; from phase 15,000 N = 2500, 3000 (runs after it differ, see below) |
+| 1,402,241 | 364,948 or 522,086 | | from phase 15,000: N = 2500 and 3000 agree on the phase only |
+
+Correction (from the exact full tape at phase 15,000, `data/state15000.txt.gz` from `fullmodel.py`, with `N = 2,500` and
+`3,000`): both runs reproduce every excursion above through 855,378 with the same four runs, and at 1,011,350 they
+agree on `A, B, C = 219,297, 171,592, 78,245` (`D` = 244,131 or 443,838). The `N = 2,000` run from phase 10,000
+had `B, C, D = 80,185, 485, 589` there, and its next three excursions (1,310,834, 1,313,118, 1,316,154, with runs
+of a few hundred) were artifacts of too little information: from phase 15,000 the next excursion is at 1,402,241.
 
 No short run (length <= 4) next to the bottom in this range. The horizon is limited by information, not by
 speed: an excursion merges many runs into the new bottom (`201,658 -> 410,262`), so a few hundred tokens are
@@ -446,7 +450,7 @@ and the run left next to it is a joined block (so at least 5: safe). When `A` is
 absorb 3 runs and leave the 4th run on its own next to it, unchanged: with `A..D = 30, 41, 51, 61` the new bottom is
 `30 + 41 + 51 - 3 = 119` and `61` sits next to it. Had `D` been 2 to 4, the following excursion would halt. So the
 machine halts only if, at some excursion, the bottom takes 3 runs and the run after them is short and is still
-short when the bottom has counted down to it. In the real run that single-run case has happened once in 19
+short when the bottom has counted down to it. In the real run that single-run case has happened once in the 16
 excursions (445,107, with `D = 65,463`).
 
 End to end (`phase_sim/routeone.py`: set the runs, run through this excursion and the next one, and on a stuck
@@ -484,10 +488,7 @@ predictor), the number absorbed by the new bottom, and the shortest of the first
 | 326,345 | 82,349 | 36,411 | 89,522 | 44,351 | 2 | 36,411 |
 | 445,107 | 201,658 | 49,627 | 158,981 | 65,463 | 3 | 35,305 |
 | 855,378 | 65,463 | 90,507 | 134,142 | 85,152 | 2 | 60,536 |
-| 1,011,350 | 219,297 | 80,185 | 485 | 589 | 2 | 485 |
-| 1,310,834 | 1,077 | 1,205 | 1,277 | 1,007 | 2 | 381 |
-| 1,313,118 | 2,287 | 747 | 747 | 747 | 2 | 747 |
-| 1,316,154 | 1,497 | 1,617 | 937 | 765 | 2 | 765 |
+| 1,011,350 | 219,297 | 171,592 | 78,245 | 244,131 or 443,838 | 2 | |
 
 The closest call is phase 89, with a 3 as the third run (absorbed safely). After the first few hundred phases the runs
 near the bottom are hundreds to hundreds of thousands long. Three runs were absorbed at 445,107 (A even, B odd, as
