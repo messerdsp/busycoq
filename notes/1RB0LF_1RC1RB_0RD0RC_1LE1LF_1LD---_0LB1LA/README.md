@@ -1,5 +1,7 @@
 # Notes: `1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA`
 
+The Busy Beaver problem asks which n-state Turing machines halt when started on a blank tape; the [bbchallenge](https://bbchallenge.org) community is settling the six-state case with machine-checked proofs, and about 600 machines are still open. This is a study of one of them: it reduces the machine to a timer-and-counter system, proves that reduction in the Rocq proof assistant, and uses fast exact simulation (C, with a Python reference) to test the one statement left open.
+
 BB(6) holdout (on the 608 list of 30 Oct 2026; spreadsheet class *Sync bouncer counter*).
 **Status: open.** No proof here: analysis notes, tools to reproduce them, and a Rocq reduction (`rocq/`,
 section 6): the holdout does not halt if an explicit list machine never reaches a "bad overflow".
@@ -20,7 +22,7 @@ Everything below marked *(sim)* was checked by direct simulation; apart from the
   wave process, and with a random counter the model hits a bad overflow within 80 phases every time. No invariant
   is known; heuristically a halt is very unlikely.
 
-**Picking this up (for another person or model).** Everything needed is in this folder; no other context is assumed.
+**Picking this up.**
 
 * *The open statement*, exactly: `holdout_nonhalt_of_iterL` (`rocq/M9List.v`) reduces non-halting to
   `forall n, iterL n startL <> None` for the list machine `stepL` with `startL := LL 5 5 [1;0]`, and
