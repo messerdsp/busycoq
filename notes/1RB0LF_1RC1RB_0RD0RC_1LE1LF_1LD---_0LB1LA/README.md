@@ -340,6 +340,18 @@ adding one more gap and the run below the front, 0 of 800. For outcomes reaching
 and `d` takes values from -8 to 3, more than expected, so the front detection or the definition of `d` still needs
 work. Next: define the wave state exactly (front position, `d`, pending `z2`/`z4`) and tabulate the transducer on it.
 
+**Exact wave position, and why a data table has not closed** (`phase_sim/wavestate.py`, `wavefsm.py`,
+`fsmcheck.py`, `parsestop.c`). The lowest wave is where the digit parse of `r` stops; recording that cell at every
+phase start of the real run from 14,700 to 16,000 gives a clean picture for about 70% of phases: the stop sits on one
+token for a few phases while `d` falls by one per phase, then moves up a couple of tokens and `d` resets. In the other
+30% the parse runs past the wave (the two-phase rhythm above). But tabulating (phase parity, `d`, stop offset, run
+parities around the stop) -> next state over these 943 transitions still leaves 17 to 25 conflicting keys at best,
+with only one or two samples per key. Part of the reason is that `d` is not local: it is a digit count over the whole
+word below the wave, and the units below give different digit counts on alternate phases (near phase 15,900, `d` is
+about -4 on even phases and -1 to 5 on odd ones). The next attempt should derive the wave step from the machine's
+transitions at the cell level (one carry sweep through a gap of 2, 3 or 4 with given parse state and neighbouring run
+parities) instead of from run statistics.
+
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
