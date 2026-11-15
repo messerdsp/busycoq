@@ -640,6 +640,8 @@ python3 run37.py out 10000       # the real run: out.log (per phase), out.low (l
 python3 excursions.py out.low     # the excursion table above
 gcc -O3 -shared -fPIC -o libparsestop.so parsestop.c
 JUMP=1 FILL=10 python3 lowsim.py data/state10000.txt.gz 2000 2200 1400000 pred   # predicted excursions
+gcc -O3 -march=native -o lowsim_c lowsim_c.c -lgmp -lz   # C port of lowsim.py: same output files, about 70x faster
+JUMP=1 FILL=10 ./lowsim_c data/state20000.txt.gz 3000 3200 4000000 pred20k
 STRICT=1 python3 fullmodel.py data/state14700.txt.gz 20000 full 5000   # exact full tape, 13-rule model, no machine sweeps
 python3 haltgrid2.py data/state14700.txt.gz 20580                     # halting grid just before the 20,595 excursion
 python3 routeone.py data/state14700.txt.gz 20580 30,41,51,3,61        # the D = 3 route: halts at the next excursion
