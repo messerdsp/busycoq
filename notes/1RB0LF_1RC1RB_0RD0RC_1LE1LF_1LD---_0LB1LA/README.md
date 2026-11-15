@@ -411,6 +411,35 @@ short when the bottom has counted down to it. In the real run that single-run ca
 excursions (445,107, with `D = 65,463`). The remaining proof task is therefore about short runs only: show that no
 run of length 2 to 4 is ever the 4th run above the bottom at such an excursion.
 
+**How close the real run comes.** The four runs above the bottom at each excursion (real run to 10,000, then the
+predictor), the number absorbed by the new bottom, and the shortest of the first 11 runs:
+
+| phase | A | B | C | D | absorbed | shortest of first 11 |
+|---|---|---|---|---|---|---|
+| 89 | 14 | 12 | 3 | 71 | 2 | 3 |
+| 117 | 77 | 17 | 57 | 33 | 2 | 17 |
+| 213 | 93 | 177 | 112 | 69 | 2 | 17 |
+| 485 | 700 | 277 | 40 | 109 | 3+ | 40 |
+| 3,319 | 555 | 988 | 23 | 76 | 2 | 23 |
+| 4,864 | 102 | 202 | 192 | 809 | 2 | 45 |
+| 5,170 | 1,052 | 853 | 593 | 2,322 | 3 | 250 |
+| 7,673 | 3,596 | 2,829 | 505 | 1,016 | 3 | 505 |
+| 14,609 | 3,749 | 2,235 | 37,239 | 4,935 | 2 | 1,061 |
+| 20,595 | 42,177 | 12,206 | 3,604 | 8,108 | 2 | 3,604 |
+| 74,980 | 11,715 | 65,460 | 46,780 | 67,464 | 2 | 11,715 |
+| 152,157 | 114,247 | 59,939 | 34,139 | 48,207 | 2 | 19,041 |
+| 326,345 | 82,349 | 36,411 | 89,522 | 44,351 | 2 | 36,411 |
+| 445,107 | 201,658 | 49,627 | 158,981 | 65,463 | 3 | 35,305 |
+| 855,378 | 65,463 | 90,507 | 134,142 | 85,152 | 2 | 60,536 |
+| 1,011,350 | 219,297 | 80,185 | 485 | 589 | 2 | 485 |
+| 1,310,834 | 1,077 | 1,205 | 1,277 | 1,007 | 2 | 381 |
+| 1,313,118 | 2,287 | 747 | 747 | 747 | 2 | 747 |
+| 1,316,154 | 1,497 | 1,617 | 937 | 765 | 2 | 765 |
+
+The closest call is phase 89, with a 3 as the third run (absorbed safely). After the first few hundred phases the runs
+near the bottom are hundreds to hundreds of thousands long. Three runs were absorbed at 445,107 (A even, B odd, as
+the grid above predicts) and in the early cases where the first runs were short.
+
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
