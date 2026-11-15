@@ -1,8 +1,8 @@
 # Notes: `1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA`
 
 BB(6) holdout (on the 608 list of 30 Oct 2026; spreadsheet class *Sync bouncer counter*).
-**Status: open.** No proof here: analysis notes, tools to reproduce them, and the first Rocq lemmas of a
-proof (`rocq/`, section 6).
+**Status: open.** No proof here: analysis notes, tools to reproduce them, and a Rocq reduction (`rocq/`,
+section 6): the holdout does not halt if an explicit list machine never reaches a "bad overflow".
 Everything below marked *(sim)* was checked by direct simulation; nothing here is proved.
 
 | state | read 0 | read 1 |
@@ -477,12 +477,12 @@ slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
 
 **What a proof still needs.** Two parts, of very different difficulty.
 
-1. *The per-phase part* (looks routine). The timer lemmas of `SBCv9.v` under `a` odd (and `a = 3 mod 4` by a
+1. *The per-phase part* (done in Rocq, see below). The timer lemmas of `SBCv9.v` under `a` odd (and `a = 3 mod 4` by a
    trivial induction), the digit arithmetic (`rest`, `RIncs`, as upstream), the 13 carry rules and the 2 bookkeeping
    sweeps as Rocq lemmas, and a local invariant on `r` (gap and run shapes) showing that every carry sweep meets one
    of the 13 windows. All of this is checked by simulation. In Rocq so far (`rocq/`): the timer lemmas, the
-   counter arithmetic, the carry rules as lemmas, and the reduction `runs start -> ~ halts holdout c0` (below); the
-   invariant is not done (a candidate, tested but not proved: runs of length 1 only inside the parse prefix).
+   counter arithmetic, all carry windows as lemmas, a carry proved total on every word, and the reduction
+   `holdout_nonhalt_of_no_bad` (below), so no local invariant is needed.
 2. *The global part* (open, and possibly as hard as a cryptid). At every excursion, the run next to the bottom is at
    least 5. The pieces known: below the top, runs are created only as transient 2s inside a wave; each wave passes every run once, and leaves it either
    merged (length at least the sum plus 2) or single, changed by -3 to +3 in the data, depending on parities and the wave's
@@ -529,6 +529,29 @@ arithmetic, digit addition, `0 -> 1`, and the 21 carry lemmas) never gets stuck.
 carry meets a window outside the 21 (the local invariant) or when `b = 0` and the word does not start with `00`,
 `101` or `11` (the halt route of the excursions).
 
+**The local part is now proved** (`rocq/M9Windows2.v`, `M9List.v`, `M9Total.v`). The carry does not need an
+invariant after all. Every stop pattern has a lemma: after a t0 `0110` all 12 non-digit 4-cell patterns, after a
+t1 `10` all 12, and at a t1 stop all 4 (`01xx`), 30 windows proved by computation. Two of them (`0110|0100`,
+`0110|0101`) return in a different state `X = (C,[1;1])`. In that state every t0 `0110` below becomes `1111` and
+passes `X` on, and the first t1 `10` below becomes `11` and returns to the normal t1 state (4 more lemmas). The
+word is kept as a list (tape `w *> 0inf`). `carryL` follows the parse with both return modes, and `carryL_spec`
+says it is sound. `carryL_total` proves that with fuel `|w| + 1` it always succeeds. The proof is induction on
+`|w|`, plus a computation over all 256 possible first 8 cells: after the windows fail, the next cells are a valid
+digit, and every start is covered. The macro step `stepL` does one increment when `b > 0` and the reset/overflow
+rules when `b = 0`. It can only get stuck at `b = 0` with a word starting with none of `101`, `11`, `00`
+(`stepL_stuck`). So:
+
+```
+Theorem holdout_nonhalt_of_no_bad:
+  (forall n x, iterL n startL = Some x -> ~ bad x) -> ~ halts holdout c0.
+```
+
+Assumptions: `functional_extensionality_dep` only. A bad configuration is not always a halt (simulated from a few
+bad ones, some halt within a few thousand steps and some do not, depending on `k`), so this is one direction
+only, which is the one a non-halting proof needs. Run from the start in Rocq, `stepL` takes 200,000 steps (to
+`b = 7,532`) without reaching a bad overflow. What remains is exactly the global statement: the list machine never
+reaches `b = 0` with a word that starts with none of `101`, `11`, `00`.
+
 The two parts behave very differently (`phase_sim/randb.py`): run the same macro model from the blank tape but
 replace `b` by a random number at every overflow (same bit length, or a random length). Over 20 runs of up to 80
 phases no carry ever meets a window outside the 21, so the local invariant looks independent of `b`, and a proof of
@@ -568,6 +591,7 @@ cd notes/1RB0LF_1RC1RB_0RD0RC_1LE1LF_1LD---_0LB1LA/rocq
 coqc $(cat _CoqProject) M9Timer.v && coqc $(cat _CoqProject) M9Run.v   # M9Run takes about a minute
 coqc $(cat _CoqProject) M9Carry.v                                       # about two minutes
 coqc $(cat _CoqProject) M9Reduce.v                                      # the reduction theorem
+coqc $(cat _CoqProject) M9Windows2.v && coqc $(cat _CoqProject) M9List.v && coqc $(cat _CoqProject) M9Total.v
 ```
 
 Phase-level simulation (needs Python 3 and a C compiler):
