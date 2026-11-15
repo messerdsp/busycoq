@@ -1,5 +1,9 @@
 # BusyCoq
 
+> **This fork:** notes and tools for the BB(6) holdout `1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF`: see
+> [notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/README.md](notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/README.md).
+> The rest of this page is the upstream BusyCoq README.
+
 This project contains partial proof of [BB(6)](https://wiki.bbchallenge.org/wiki/BB(6)), BB(2,5) and BB(3,3).
 
 We focus on proving whether each TM of given size halt or not, and we don't care about the step count or sigma score for simplicity.
