@@ -313,8 +313,8 @@ are a deterministic carry and could favour some patterns.
 14,731 (front `o1385 z2 o1273 z3 o909 z3 o8225`), replace the run below the front and the three above it by every
 combination of lengths 9 to 12 (all four classes mod 4; also 5 to 8 and 105, 106 in a second test), and run one phase.
 The result is a function of the four parities only: 8 outcomes, for example both odd below and at the front gives
-the merge `W + X + 2` followed by `X2 + 2` and a new `z2` if `X2` is even, and `X2 + 1` with `X3 + 1` if `X2` is odd; an even run
-below the front stops the `z2` merge altogether. So for runs of length >= 5 the wave is a finite-state machine on
+the merge `W + X + 2`, then `z2 (X2 + 2) z2` if `X2` is even and `z2 X2 z3 (X3 + 1)` if `X2` is odd; an even run below
+the front stops the `z2` merge altogether. So for runs of length >= 5 the wave is a finite-state machine on
 run parities. What else enters is not settled: in synthetic runs (`phase_sim/synth.py`: random runs of length 9 to
 16 put above the wave, then 220 phases) the same 4-run parity window gives different steps at different phases,
 and two such cases differ only in the phase parity (bottom 5,871 against 5,754), so the phase parity, and
