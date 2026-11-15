@@ -380,6 +380,27 @@ equal to the machine's, and the tokens equal the full run's. So the machine is e
 `SBCv9.v`, binary addition on the digit word, 13 local carry rules and 2 bookkeeping rules. Each of these is a
 small statement that can be proved once in Rocq (like `RIncs` upstream), which is the per-phase half of a proof.
 
+**Exact halting criterion at an excursion** (`phase_sim/haltgrid.py`, `rlesim.py`). Take the real state at phase
+14,606 (bottom run 4, then `A = 3,749`, `B = 2,235`), set `A` and `B` to small values, and run 30 phases. Where the
+macro model stops (`b = 0` without the overflow pattern), the real machine is run from that configuration with a
+run-length simulator that crosses whole runs at once (the timer part `1^a` has `a` of about 2,200 bits). That
+simulator agrees with plain step-by-step simulation on 400 random small configurations. Result (`H` = halts,
+`.` = no halt in 30 phases):
+
+```
+A\B    1    2    3    4    5    6    7    8    9   10 2235 2236
+  1    .    .    .    .    .    .    .    .    .    .    .    .
+  2    .    H    H    .    .    .    .    .    .    .    .    .
+  3    .    .    H    H    H    H    H    H    .    .    H    H
+  4    .    H    H    H    H    .    H    H    H    H    H    H
+5..12  .    .    .    .    .    .    .    .    .    .    .    .
+```
+
+So a run of length 5 or more next to the bottom is always safe, and lengths 2 to 4 can halt (3 and 4 almost
+always). The halt is real: the machine ends in `G` reading a 1. With the model above, a non-halting proof needs
+exactly one more fact: at every excursion the run next to the bottom has length 1 or at least 5. The parity of `A`
+also decides how many runs the bottom absorbs (odd `A`: 2, even `A`: 3, from the same grid run).
+
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
