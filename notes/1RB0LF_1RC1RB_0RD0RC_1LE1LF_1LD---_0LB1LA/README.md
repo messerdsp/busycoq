@@ -309,17 +309,24 @@ of 1,147 runs above), so a naive estimate is `i^-2.5` per short run. The sum ove
 the chance of a halt would be small, and smaller the longer it runs. That is a heuristic, not a proof: the waves
 are a deterministic carry and could favour some patterns.
 
-**Toward the exact wave rule** (`phase_sim/wavetab.py`). Tabulating each phase's local rewrite from the per-phase
-log: keyed on start-cell parity and run parities over 8 tokens, 82 of 230 contexts still have more than one
-outcome; keyed on run lengths mod 8 over 10 tokens it is deterministic, but with about one sample per key that
-proves nothing. The rule should come out of the digit parse above (decode the window to digits, add one carry,
-encode again) rather than from data; that is the next step.
+**Toward the exact wave rule.** Controlled test (`phase_sim/frontexp.py`): take the real state one phase after
+14,731 (front `o1385 z2 o1273 z3 o909 z3 o8225`), replace the run below the front and the three above it by every
+combination of lengths 9 to 12 (all four classes mod 4; also 5 to 8 and 105, 106 in a second test), and run one phase.
+The result is a function of the four parities only: 8 outcomes, for example both odd below and at the front gives
+the merge `W + X + 2` followed by `X2 + 2` and a new `z2` if `X2` is even, and `X2 + 1` with `X3 + 1` if `X2` is odd; an even run
+below the front stops the `z2` merge altogether. So for runs of length >= 5 the wave is a finite-state machine on
+run parities. What else enters is not settled: in synthetic runs (`phase_sim/synth.py`: random runs of length 9 to
+16 put above the wave, then 220 phases) the same 4-run parity window gives different steps at different phases,
+and two such cases differ only in the phase parity (bottom 5,871 against 5,754), so the phase parity, and
+probably the position parity, are part of the state. Mining the logs (`phtab.py`, `learn.py`) with these
+features still leaves about one sample per key, so the full table has to come from controlled tests like the
+one above, run over all front configurations and both phase parities. That is the next step.
 
 **Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
 costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
-and from phase 10,000 with `N = 2,500` its first 300 tokens equal the full run's at every phase checked so far
-(10,001 to 12,412); with `N = 2,000` it gives the same first excursion (14,609, next run 3,749).
+and from phase 10,000 with `N = 2,500` its first 300 tokens equal the full run's at every phase
+from 10,001 to 14,620; with `N = 2,000` it gives the same first excursion (14,609, next run 3,749).
 
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
