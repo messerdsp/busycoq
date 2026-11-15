@@ -327,7 +327,7 @@ costs an extra increment block per phase once a wave is inside the kept tokens, 
 90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
 and from phase 10,000 with `N = 2,500` its first 300 tokens equal the full run's at every phase
 from 10,001 to 14,620; with `N = 2,000` it gives the same first four excursions as the
-slow version (14,609, 20,595, 74,980, 152,157, with the same runs), in 50 minutes instead of several hours.
+slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
 
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
