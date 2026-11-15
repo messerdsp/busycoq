@@ -482,7 +482,7 @@ slow version (14,609, 20,595, 74,980, 152,157, with the same runs).
    sweeps as Rocq lemmas, and a local invariant on `r` (gap and run shapes) showing that every carry sweep meets one
    of the 13 windows. All of this is checked by simulation. In Rocq so far (`rocq/`): the timer lemmas, the
    counter arithmetic, the carry rules as lemmas, and the reduction `runs start -> ~ halts holdout c0` (below); the
-   invariant is not done.
+   invariant is not done (a candidate, tested but not proved: runs of length 1 only inside the parse prefix).
 2. *The global part* (open, and possibly as hard as a cryptid). At every excursion, the run next to the bottom is at
    least 5. The pieces known: below the top, runs are created only as transient 2s inside a wave; each wave passes every run once, and leaves it either
    merged (length at least the sum plus 2) or single, changed by -3 to +3 in the data, depending on parities and the wave's
@@ -535,6 +535,9 @@ phases no carry ever meets a window outside the 21, so the local invariant looks
 it on words alone is plausible. A stronger test (`phase_sim/randk.py`): set `b` to a random value before every
 macro step (often 0 to 3, so increments and overflows happen at arbitrary times; an overflow that would get stuck
 is replaced by a small `b`). Over 20 runs of 4,000 macro steps, all 22,308 sweeps are covered by the 21 lemmas.
+But in the first test every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0` and the word
+starts with none of `00`, `101`, `11`). So staying alive depends on the exact value of `b`, the "sync" of the class
+name, and any proof of the global part has to track `b` exactly (as the marker bits above).
 
 Why, and a candidate invariant. Parse `r` from its start (state t1) until the parse fails. At a failure in state
 t0 the next 4 cells are not a t0 digit; of the 12 such patterns, the 5 that contain no run of length 1 (`1100`,
@@ -546,9 +549,7 @@ prefix*. It holds at all 30,000 configurations of 10 runs of the random-counter 
 (`phase_sim/inv1.py`), and no run of 1 occurs at any phase start of the real run. Digit addition keeps the digit
 structure (it only swaps `0000/0110`, `0011/0111`, `00/10`), so it keeps the parse prefix and the rest of the word;
 a carry zeroes digits (same structure) and rewrites one window into a longer parse prefix. Proving that it is
-preserved, in Rocq, would leave exactly the overflow condition. But every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0`
-and the word starts with none of `00`, `101`, `11`). So staying alive depends on the exact value of `b`, the
-"sync" of the class name, and any proof of the global part has to track `b` exactly (as the marker bits above).
+preserved, in Rocq, would leave exactly the overflow condition.
 
 ## 7. Reproduce
 
