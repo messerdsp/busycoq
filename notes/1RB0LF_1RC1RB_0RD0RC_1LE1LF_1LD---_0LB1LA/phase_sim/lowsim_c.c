@@ -1,5 +1,5 @@
 // C port of lowsim.py (with msim.py's macro step M.mstep for T37): same arithmetic, same output files.
-// usage: lowsim_c STATE.txt.gz N K MAXPH OUT [LOWN]     env: FILL, JUMP=1 as for lowsim.py; STATS=1 prints counts;
+// usage: lowsim_c STATE.txt.gz N K MAXPH OUT [LOWN]     env: FILL, JUMP=1 as for lowsim.py; NOFILL=1 keeps b exact (with a large N: the exact run); STATS=1 prints counts;
 // SLOW=1 uses the plain cell-by-cell sweep (as msim.py), SLOW=2 the 8-cell block sweep, default the 16-cell window sweep.
 // The output files are byte-identical to lowsim.py's (checked on 29,520 phases from data/state20000.txt.gz, N = 3000).
 // Build: gcc -O3 -march=native -o lowsim_c lowsim_c.c -lgmp -lz
@@ -66,7 +66,9 @@ static void toks_of(const uint8_t *c, long long n, Toks *t) {   // like lowsim.t
 
 // ---- state load / truncation ----
 static mpz_t KMASK_TARGET; static long long Kbits, FILLb = -1;   // FILLb < 0: no refill after overflow
+static int NOFILL;
 static void fill(mpz_t b) {
+    if (NOFILL) return;
     mpz_tdiv_r_2exp(b, b, Kbits);
     long long f = FILLb >= 0 ? FILLb : Kbits / 2;
     for (long long i = 0; i < f; i++) mpz_setbit(b, Kbits + i);
@@ -328,7 +330,7 @@ int main(int argc, char **argv) {
     const char *OUT = argv[5]; long long LOWN = argc > 6 ? atoll(argv[6]) : 24;
     const char *fe = getenv("FILL"); FILLb = (fe && *fe) ? atoll(fe) : -2;   // -2: unset in python = no refill
     int JUMP = getenv("JUMP") && !strcmp(getenv("JUMP"), "1");
-    init_table(); init_blocks(); SLOW = getenv("SLOW") ? atoi(getenv("SLOW")) : 0; wtab = malloc(sizeof(WT) * 14 * 65536); for (long i = 0; i < 14 * 65536; i++) wtab[i].exit = 255; mpz_inits(A, Bv, kk, KMASK_TARGET, NULL);
+    NOFILL = getenv("NOFILL") != NULL; init_table(); init_blocks(); SLOW = getenv("SLOW") ? atoi(getenv("SLOW")) : 0; wtab = malloc(sizeof(WT) * 14 * 65536); for (long i = 0; i < 14 * 65536; i++) wtab[i].exit = 255; mpz_inits(A, Bv, kk, KMASK_TARGET, NULL);
     dig = malloc(digcap); words = malloc((digcap / 64 + 2) * 8); kbits = malloc(1 << 24);
     // load
     gzFile g = gzopen(src, "rb"); if (!g) die("cannot open state");
