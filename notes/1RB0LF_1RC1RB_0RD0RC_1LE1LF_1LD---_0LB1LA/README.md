@@ -22,8 +22,9 @@ Everything below marked *(sim)* was checked by direct simulation; apart from the
 
 **Picking this up (for another person or model).** Everything needed is in this folder; no other context is assumed.
 
-* *The open statement*, exactly: `holdout_nonhalt_of_no_bad` in `rocq/M9Total.v` reduces non-halting to
-  `forall m, iterL m (LL 5 5 [1;0]) <> None` for the list machine `stepL` (`rocq/M9List.v`). A proof of that, or
+* *The open statement*, exactly: `holdout_nonhalt_of_iterL` (`rocq/M9List.v`) reduces non-halting to
+  `forall n, iterL n startL <> None` for the list machine `stepL` with `startL := LL 5 5 [1;0]`, and
+  `holdout_nonhalt_of_no_bad` (`rocq/M9Total.v`) to "no reachable `x` is `bad`". A proof of that, or
   an `m` where it fails (then the machine halts and the proof is a computation, as for TM2 in `verify/SBCv9.v`),
   settles the holdout.
 * *Read first*: "Where things stand" above, then section 6 (phases, waves, excursions, the halt route) and
