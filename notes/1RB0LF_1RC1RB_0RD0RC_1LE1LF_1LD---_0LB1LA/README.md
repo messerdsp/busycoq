@@ -325,6 +325,16 @@ of 1,147 runs above), so a naive estimate is `i^-2.5` per short run. The sum ove
 the chance of a halt would be small, and smaller the longer it runs. That is a heuristic, not a proof: the waves
 are a deterministic carry and could favour some patterns.
 
+**Run lineage on the exact tape** (`phase_sim/lineage.py`, `linpos.py`). The exact 13-rule model is run from the
+full tape at phase 15,000; every run gets an id, and each local edit between phase starts gives the new runs as
+parents the old runs whose cells they overlap. A run unchanged for 20 phases is "frozen"; following parents back to
+frozen runs tells, for each wave passage, which old runs became which new run. From 15,000 to 16,500, below run
+index 1,000 (where the 14,609 wave passed): 1,335 old runs became 639 new ones (a factor 2.1); 16% of the old runs
+were left single (14% of the 238 below index 300). The single ones mostly shrink: changes -3, -2, -1, 0, +1..+3 in
+25, 16, 95, 68, 16 cases. Short runs do pass single: `2 -> 3`, `3 -> 3`, `3 -> 2`, `5 -> 2`, `6 -> 4`. Higher up
+(index above 3,000, older waves) about half the old runs are left single. So the per-wave survival and shrinkage
+used in the heuristic below are measured, not assumed, near the bottom; nothing here bounds them.
+
 **Toward the exact wave rule.** Controlled test (`phase_sim/frontexp.py`): take the real state one phase after
 14,731 (front `o1385 z2 o1273 z3 o909 z3 o8225`), replace the run below the front and the three above it by every
 combination of lengths 9 to 12 (all four classes mod 4; also 5 to 8 and 105, 106 in a second test), and run one phase.
