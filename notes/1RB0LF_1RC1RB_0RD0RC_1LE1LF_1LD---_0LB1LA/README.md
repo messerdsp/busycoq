@@ -534,7 +534,19 @@ replace `b` by a random number at every overflow (same bit length, or a random l
 phases no carry ever meets a window outside the 21, so the local invariant looks independent of `b`, and a proof of
 it on words alone is plausible. A stronger test (`phase_sim/randk.py`): set `b` to a random value before every
 macro step (often 0 to 3, so increments and overflows happen at arbitrary times; an overflow that would get stuck
-is replaced by a small `b`). Over 20 runs of 4,000 macro steps, all 22,308 sweeps are covered by the 21 lemmas. But every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0`
+is replaced by a small `b`). Over 20 runs of 4,000 macro steps, all 22,308 sweeps are covered by the 21 lemmas.
+
+Why, and a candidate invariant. Parse `r` from its start (state t1) until the parse fails. At a failure in state
+t0 the next 4 cells are not a t0 digit; of the 12 such patterns, the 5 that contain no run of length 1 (`1100`,
+`1111`, `1110`, `1101`, `0001`) are exactly the right halves of the t0 windows. At a failure in state t1 the next
+2 cells are `01`; the patterns without a run of 1 are `0110` and `0111`, the t1 windows. At a carry all digits
+below the stop are 1-digits, which fixes the left halves. So `carry` succeeds whenever no run of length 1 starts
+at or after the failure point. Candidate invariant: *every run of length 1 in `r` ends inside the parse-valid
+prefix*. It holds at all 30,000 configurations of 10 runs of the random-counter model above
+(`phase_sim/inv1.py`), and no run of 1 occurs at any phase start of the real run. Digit addition keeps the digit
+structure (it only swaps `0000/0110`, `0011/0111`, `00/10`), so it keeps the parse prefix and the rest of the word;
+a carry zeroes digits (same structure) and rewrites one window into a longer parse prefix. Proving that it is
+preserved, in Rocq, would leave exactly the overflow condition. But every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0`
 and the word starts with none of `00`, `101`, `11`). So staying alive depends on the exact value of `b`, the
 "sync" of the class name, and any proof of the global part has to track `b` exactly (as the marker bits above).
 
