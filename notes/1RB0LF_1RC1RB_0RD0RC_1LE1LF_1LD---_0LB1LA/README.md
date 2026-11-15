@@ -376,7 +376,10 @@ the 13 rules. At an excursion there is one more sweep (after the `R11` step), an
 of `r` and sets `r[0] = 1`. `model9.py` simulates the machine this way, without running any machine sweep; with
 `CHECK=1` it also runs the machine and compares the whole word after every sweep. From phase 10,000 to 14,700,
 across the excursion at 14,609, all 8,691 modelled sweeps (4,699 after an overflow, 3,991 carries, 1 excursion) are
-equal to the machine's, and the tokens equal the full run's. So the machine is exactly: the timer lemmas of
+equal to the machine's, and the tokens equal the full run's. With `STRICT=1` (stop on any sweep the rules do
+not cover) and no machine sweeps after the first, the model ran from phase 10,000 to 29,438 (19,000 overflow sweeps,
+36,800 carries, 2 excursion sweeps): its first 10 tokens equal the full run's at every phase from 10,001 to 14,857
+and the predictor's at every logged phase to 24,803, across the excursions at 14,609 and 20,595. So the machine is exactly: the timer lemmas of
 `SBCv9.v`, binary addition on the digit word, 13 local carry rules and 2 bookkeeping rules. Each of these is a
 small statement that can be proved once in Rocq (like `RIncs` upstream), which is the per-phase half of a proof.
 
