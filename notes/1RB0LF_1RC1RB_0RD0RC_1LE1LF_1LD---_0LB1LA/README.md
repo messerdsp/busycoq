@@ -285,6 +285,42 @@ used per excursion, and the runs that will be next to the bottom after about pha
 tape at phase 10,000. They are written later by the top, which depends on all of `b`. From a full state at phase
 `P` this method reaches roughly phase `100 P`.
 
+**Excursion arithmetic.** At an excursion the bottom run (now 2) and the 2 or 3 runs above it become one new
+bottom run, of length about their sum, and the bottom then loses one cell per phase. So the next excursion comes
+about (new bottom) phases later: 14,609 + 5,977 + 10 = 20,596 against 20,595 predicted; 20,595 + 54,376 + 10 =
+74,981 against 74,980. Three runs are absorbed at 486, 5,171, 7,674 and 445,107; two at the others.
+
+**What one wave does to the runs** (`phase_sim/align.py`, `wavecmp.py`). Follow the wave started at 14,609 from the
+full state at phase 14,700 (`data/state14700.txt.gz`) to 15,970, and match the runs it left behind with the runs
+there at phase 10,000 (nothing else touched that region in between). Every new run is a block of consecutive old
+runs joined across their `z3` gaps (length = sum + 3 per gap), changed by at most 3 cells. Over 1,147 old runs: 508
+blocks, of which 239 pairs, 62 triples, 62 blocks of 4 to 14 runs, and 145 single runs (changed by -3 to +3, mostly
+0 or -1). A `-1` on one run with `+1` on the next is a gap moved by one cell. So each wave cuts the number of runs by
+about 2.3, and the run left next to the bottom after an excursion is usually a joined block, but not always: at
+445,107 the bottom takes three runs and the next run, 65,463, is a single old run left as it was. Short runs are
+joined more often than not: of the 45 old runs of length <= 10, 41 were joined into a longer run and 4 were left
+single (6 -> 5, 9 -> 10, 3 -> 2, 9 -> 12); a run of length 2 is erased when a wave reaches it (rule above).
+
+**Short runs are everywhere.** Runs of length <= 4 at phase 10,000, by token position: 0 in tokens 2-500, 2 in
+500-1,000, 7 in 1,000-2,000, 15 in 2,000-3,000, up to about 100 per 1,000 tokens near the top; at 14,700 there are
+again some in every range. A halt needs one of them to reach the bottom unjoined. A run at index `i` needs about
+`log_2.3 i` waves to get there, and is left single by a wave about 9 to 13% of the time (4 of 45 short runs, 145
+of 1,147 runs above), so a naive estimate is `i^-2.5` per short run. The sum over all short runs ever written converges, so if waves acted at random
+the chance of a halt would be small, and smaller the longer it runs. That is a heuristic, not a proof: the waves
+are a deterministic carry and could favour some patterns.
+
+**Toward the exact wave rule** (`phase_sim/wavetab.py`). Tabulating each phase's local rewrite from the per-phase
+log: keyed on start-cell parity and run parities over 8 tokens, 82 of 230 contexts still have more than one
+outcome; keyed on run lengths mod 8 over 10 tokens it is deterministic, but with about one sample per key that
+proves nothing. The rule should come out of the digit parse above (decode the window to digits, add one carry,
+encode again) rather than from data; that is the next step.
+
+**Speed.** The predictor keeps `b mod 2^K` plus a filler above bit `K`. The filler was `K/2` one-bits; each of them
+costs an extra increment block per phase once a wave is inside the kept tokens, which made `N = 3,000` run at
+90 s per phase. With `FILL=10` (10 filler bits, re-trimmed every phase) it is about 10 phases per second again,
+and from phase 10,000 with `N = 2,500` its first 300 tokens equal the full run's at every phase checked so far
+(10,001 to 12,412); with `N = 2,000` it gives the same first excursion (14,609, next run 3,749).
+
 **What a proof still needs.** The exact wave rule (how a wave turns old runs into digits, and when it merges),
 what the top writes, and an invariant showing that no run of length <= 4 is ever next to the bottom when the bottom
 reaches 2. The timer side is done: the `SBCv9.v` lemmas carry over under `a` odd, and `a` is odd by a trivial

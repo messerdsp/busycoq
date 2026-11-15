@@ -16,20 +16,28 @@ def cells(tk):
     r = []
     for t in tk: r += [1 if t[0] == 'o' else 0] * int(t[1:])
     return r
+FILL = int(os.environ['FILL']) if os.environ.get('FILL') else None   # filler bits above bit K (default K // 2)
+def fill(b, K): return b % 2**K + 2**K * (2**(FILL if FILL is not None else K // 2) - 1)
 def trunc_state(a, b, r, mode, nov, N, K):
     T = toks(r)[:N]
     if T[-1][0] == 'z': T = T[:-1]
-    m = M(T37, a, b % 2**K + 2**K * (2**(K // 2) - 1), cells(T)); m.mode = mode; m.nov = nov
+    m = M(T37, a, fill(b, K), cells(T)); m.mode = mode; m.nov = nov
     return m
-if __name__ == '__main__':
-    src, N, K, MAXPH, OUT = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
-    LOWN = int(sys.argv[6]) if len(sys.argv) > 6 else 24
+def load_state(src):
+    """start:PHASE (simulate from the blank-tape start), stateNNNN.txt.gz (a, b in hex, r as run tokens) or a pickle."""
     if src.startswith('start:'):
         P0 = int(src[6:]); m0 = M(T37, 11, 5, [1, 0])
         while m0.nov < P0: m0.mstep()
-        st = dict(a=m0.a, b=m0.b, r=m0.r_list(), mode=m0.mode, nov=m0.nov)
-    else:
-        st = pickle.load(open(src, 'rb'))
+        return dict(a=m0.a, b=m0.b, r=m0.r_list(), mode=m0.mode, nov=m0.nov)
+    if src.endswith('.txt.gz'):
+        import gzip
+        st = dict(l.rstrip('\n').split(' ', 1) for l in gzip.open(src, 'rt'))
+        return dict(a=int(st['a'], 16), b=int(st['b'], 16), mode=st['mode'], nov=int(st['nov']), r=cells(st['r'].split()))
+    return pickle.load(open(src, 'rb'))
+if __name__ == '__main__':
+    src, N, K, MAXPH, OUT = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
+    LOWN = int(sys.argv[6]) if len(sys.argv) > 6 else 24
+    st = load_state(src)
     m = trunc_state(st['a'], st['b'], st['r'], st['mode'], st['nov'], N, K)
     JUMP = os.environ.get('JUMP') == '1'; Q = K + 100; quiet = 0; prevT = None; exc = open(OUT + '.exc', 'w')
     out = open(OUT, 'w'); t0 = time.time(); tp = t0; KC = {}; DBG = os.environ.get('DBG') == '1'
@@ -37,6 +45,7 @@ if __name__ == '__main__':
         while m.nov < MAXPH:
             k = m.mstep(); KC[k] = KC.get(k, 0) + 1
             if k == 'OV':
+                if FILL is not None: m.b = fill(m.b, K)   # bits of b above K only reach tokens above N
                 if DBG and time.time() - tp > 0.3: print('slow', m.nov, f"{time.time() - tp:.2f}", KC, 'rlen', m.hi - m.off, 'bbits', m.b.bit_length(), flush=True)
                 tp = time.time(); KC.clear()
                 T = toks(m.r_list()[:4_000_000])
