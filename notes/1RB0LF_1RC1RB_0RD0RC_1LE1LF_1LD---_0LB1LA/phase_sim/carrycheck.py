@@ -33,7 +33,8 @@ while m.nov < int(sys.argv[1]):
         if r0 and r0[0] == 0: m.mstep(); continue
         pr, i = carry_py(r0)
         m.mstep(); r1 = list(m.buf[m.off:m.hi])
-        if pr is None or pr[:len(r1)] != r1:
+        L = max(len(r1), len(pr) if pr else 0) + 8
+        if pr is None or (list(pr) + [0] * L)[:L] != (r1 + [0] * L)[:L]:
             # window around i
             key = ''.join(map(str, r0[max(0, i-4):i])) + '|' + ''.join(map(str, r0[i:i+8]))
             misses[(pr is None, key, m.nov)] += 1

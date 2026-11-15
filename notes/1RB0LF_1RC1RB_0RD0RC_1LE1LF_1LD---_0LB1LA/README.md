@@ -529,6 +529,13 @@ arithmetic, digit addition, `0 -> 1`, and the 21 carry lemmas) never gets stuck.
 carry meets a window outside the 21 (the local invariant) or when `b = 0` and the word does not start with `00`,
 `101` or `11` (the halt route of the excursions).
 
+The two parts behave very differently (`phase_sim/randb.py`): run the same macro model from the blank tape but
+replace `b` by a random number at every overflow (same bit length, or a random length). Over 20 runs of up to 80
+phases no carry ever meets a window outside the 21, so the local invariant looks independent of `b`, and a proof of
+it on words alone is plausible. But every one of the 20 runs gets stuck within 80 phases at an overflow (`b = 0`
+and the word starts with none of `00`, `101`, `11`). So staying alive depends on the exact value of `b`, the
+"sync" of the class name, and any proof of the global part has to track `b` exactly (as the marker bits above).
+
 ## 7. Reproduce
 
 ```bash
