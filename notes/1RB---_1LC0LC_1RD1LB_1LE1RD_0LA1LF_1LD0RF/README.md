@@ -96,6 +96,14 @@ unit and the unchanging end `...1011111111101010101111111111111`), and the band 
 decides when the end reaches this state is not known; in the real run the new chain has not reached it by 10^18
 steps.
 
+**The end of the new chain cycles** (*sim*, `data/end_events_new_chain_to_1e18.txt.gz`: the end of the real new chain,
+between its last wall of 40 or more words and the band, every 4,096th round start from 2.5·10^15 to 10^18;
+`ENDB=40 ENDBEVERY=4096`). With every wall replaced by one symbol, the 1,081 recorded end states take 480 distinct
+values, the first repeat comes by 2.8·10^15, and over the last 300 states the sequence is periodic with period 536.
+So the end of the new chain runs through a fixed cycle of shapes while its walls grow, and does not reach the young
+unit + unchanging end seen before the two overflows. If the cycle is exact, the new chain never overflows; this is
+the kind of statement an invariant can carry. Observed on sampled states, not proved.
+
 **A rule for the top walls** (*sim*). In the cascade each of the two top walls of the old chain is replaced by a band
 and a fresh chain: a wall of `W` words becomes about `2W/3` blocks of band (`W/6` copies of the 24-cell word)
 followed by a chain with walls `W/4, W/16, W/64, ...`:
@@ -149,7 +157,8 @@ the cascade are the likely reason: no small set of local patterns describes them
    single moves).
 2. Births at the end of the chain, next to the fixed tail.
 3. The overflow: when the end of the tape stops absorbing carries (section 3), and the cascade it writes, as a
-   rule for a chain of any length (the top walls follow `W -> 2W/3` blocks of band + a chain `W/4, W/16, ...`),
+   rule for a chain of any length; for the real new chain the end runs through a cycle (section 3), which would
+   rule its overflow out (the top walls follow `W -> 2W/3` blocks of band + a chain `W/4, W/16, ...`),
    including the later rewrites of the frozen cascade (`B, W -> B + 8W/9`, chain `W/3, ...` in scaled-down runs).
 4. An invariant on the family of tapes this produces (chains, frozen cascades, leftover words) that excludes
    `1 0 0 0 0 B> 1`, plus the start up to step 2·10^8 by computation.

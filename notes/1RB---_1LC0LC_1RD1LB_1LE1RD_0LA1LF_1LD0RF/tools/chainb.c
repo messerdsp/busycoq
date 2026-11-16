@@ -8,6 +8,8 @@
 //   EVERY < 0: print every |EVERY|-th round start (first left-end event after the head was away)
 //   env SKEL=1: print a skeleton instead of the tape: runs of >= 3 equal blocks as counts, [n] = n blocks between
 //   env ENDT=T: at round starts, print the end region (runs right of the last run of >= T blocks) when it changes
+//   env ENDB=T [ENDBEVERY=k]: at round starts (every k-th), print the end of the first chain (runs between its
+//     last run of >= T blocks and the band) when it changes
 //   env INIT=file: start from a printed full line (as written with EVERY < 0); MAXSTEPS then counts from it
 // build: gcc -O2 -o chainb chainb.c
 #include <stdint.h>
@@ -99,6 +101,26 @@ int main(int argc, char **argv) {
             s = x->ns; dr = x->exitR;
         }
         static int away = 1;
+        static long endbcount = 0;
+        if (getenv("ENDB") && !dr && L.len == 0 && away && (endbcount++ & (getenv("ENDBEVERY") ? atol(getenv("ENDBEVERY")) - 1 : 0)) == 0) {     // end of the first chain: runs between its last run >= T and the band
+            static long T = 0; if (!T) T = atol(getenv("ENDB"));
+            long lastbig = -1, single = 0, bandstart = -1;
+            for (long i = R.len - 1; i >= 0; i--) {             // left to right
+                if (R.r[i].n == 1) { if (++single >= 200) { bandstart = i + 199; break; } }
+                else { single = 0; if (R.r[i].n >= (uint64_t)T) lastbig = i; }
+            }
+            if (bandstart >= 0 && lastbig > bandstart) {
+                static uint32_t pv[4096]; static uint64_t pc[4096]; static long pn = -1;
+                long n = lastbig - bandstart - 1; int d = n != pn;
+                for (long j = 0; j < n && j < 4096 && !d; j++) d = pv[j] != R.r[lastbig - 1 - j].b || pc[j] != R.r[lastbig - 1 - j].n;
+                if (d && n < 4096) {
+                    for (long j = 0; j < n; j++) { pv[j] = R.r[lastbig - 1 - j].b; pc[j] = R.r[lastbig - 1 - j].n; } pn = n;
+                    pr128(out, steps); fprintf(out, " W%llu", (unsigned long long)R.r[lastbig].n);
+                    for (long j = lastbig - 1; j > bandstart; j--) { fputc(' ', out); prb(out, R.r[j].b); if (R.r[j].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[j].n); }
+                    fputc('\n', out); fflush(out);
+                }
+            }
+        }
         if (getenv("ENDT") && !dr && L.len == 0 && away) {     // at round starts: print the end region when it changes
             static long T = 0; if (!T) T = atol(getenv("ENDT"));
             static uint32_t pv[4096]; static uint64_t pc[4096]; static long pn = -1;
