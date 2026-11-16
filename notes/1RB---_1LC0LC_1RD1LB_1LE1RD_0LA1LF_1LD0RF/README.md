@@ -183,18 +183,27 @@ the cascade are the likely reason: no small set of local patterns describes them
 The observations suggest a two-part proof: the machine reaches the tape after the second overflow, and from there
 it never overflows again, because the end of the new chain cycles.
 
-1. *From the second overflow on (an invariant).* Tapes of the form: prefix, the first units with their leftover
-   words, a chain of deep units (any wall lengths, any digit phases), an end in one of the 536 cycle shapes, the band
-   and the frozen cascade unchanged. Closed under one round: the deep-unit rounds are proved (`unit_round_a/b/c`,
-   `unit_carry`); still needed are the rounds of the first units, and one lemma per transition of the end cycle
-   (with the walls in it symbolic, their lengths mod 4 fixed). The halting pattern `1 0 0 0 0 B> 1` cannot occur in
-   such tapes.
+1. *From the second overflow on (an invariant), at round starts.* A tape of the form
+
+       prefix, units 1 and 2 (phase + fixed leftover word, wall n1, n2), deep units (wall n_i, phase p_i),
+       the last wall of >= 40 words, the end region in one of its 536 states, the band (any length), the cascade
+
+   with the walls n_i symbolic. One round is: the pass from the left end into unit 1; for each unit either
+   `unit_round_*` (turn back) or `unit_carry` (carry on); when the carry passes the last big wall, one of the
+   534 lemmas in `rocq/end/` (or the band pass, `band_pass`, for the one transition that crosses the band); the sweep
+   back to the left end (`wall_l` over each wall). Done: the block rules, `wall_pass`, `wall_l`, `band_pass`, the
+   rounds and carries of deep units and of units 1 and 2, and the 534 end transitions. To do: the prefix at the left
+   end (the turn that starts each round); the band-crossing transition's two ends (entering the band, turning at the
+   first frozen wall); the bookkeeping that turns the tape after a round back into the round-start form (each unit's
+   wall grows by one word every other step of its phase, section 1); a wall leaving the end region when it reaches
+   40 words; and the closure argument (`progress_nonhalt` over this family). The halting pattern
+   `1 0 0 0 0 B> 1` does not occur in any of the lemmas' configurations.
 2. *Reaching that tape.* The second overflow is at step 1.4·10^15, far beyond step-by-step computation in Rocq. It
    needs the first chain as an accelerated counter (rounds skipped arithmetically), its end process up to the
    overflow, and the overflow itself (the cascade rule for the top walls, section 3). This is the larger part.
 
-Unknown before either is done: whether the cycle of the end holds exactly for all wall lengths (it is observed for
-the lengths that occur to 2·10^17), and whether the first units' leftover words ever change.
+The end cycle is observed for the transitions that occur to 2·10^17; the closure argument would check that every
+successor of a covered state is covered.
 
 ## 7. Reproduce
 
