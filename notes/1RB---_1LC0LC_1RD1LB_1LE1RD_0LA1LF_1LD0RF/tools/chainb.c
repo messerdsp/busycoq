@@ -10,6 +10,8 @@
 //   env ENDT=T: at round starts, print the end region (runs right of the last run of >= T blocks) when it changes
 //   env ENDB=T [ENDBEVERY=k]: at round starts (every k-th), print the end of the first chain (runs between its
 //     last run of >= T blocks and the band) when it changes
+//   env XEND=1: once per round, when the head moving right passes the chain's last wall of >= 40 words, print
+//     the configuration (L runs, back block, R runs to 60 blocks into the band): the start of an end transition
 //   env INIT=file: start from a printed full line (as written with EVERY < 0); MAXSTEPS then counts from it
 // build: gcc -O2 -o chainb chainb.c
 #include <stdint.h>
@@ -70,7 +72,7 @@ int main(int argc, char **argv) {
     u128 steps = 0;
     if (getenv("INIT")) {      // start from a printed full line: "steps state back run run ..." (head at the left end, moving left)
         FILE *f = fopen(getenv("INIT"), "r"); if (!f) { fprintf(stderr, "no INIT file\n"); return 2; }
-        static char line[1 << 24]; if (!fgets(line, sizeof line, f)) return 2; fclose(f);
+        char *line = NULL; size_t lcap = 0; if (getline(&line, &lcap, f) <= 0) return 2; fclose(f);
         char *tok = strtok(line, " \n"); steps = 0; for (char *c = tok; *c; c++) steps = steps * 10 + (*c - '0');
         tok = strtok(NULL, " \n"); s = tok[0] - 'A'; dr = 0;
         Run *tmp = NULL; long nt = 0, ct = 0; int first = 1;
@@ -101,6 +103,26 @@ int main(int argc, char **argv) {
             s = x->ns; dr = x->exitR;
         }
         static int away = 1;
+        static long xb_last = -1, xb_band = -1; static int xb_done = 1;
+        if (getenv("XEND")) {
+            if (!dr && L.len == 0 && away) {           // round start: locate the last big wall and the band
+                long lastbig = -1, single = 0, bandstart = -1;
+                for (long i = R.len - 1; i >= 0; i--) {
+                    if (R.r[i].n == 1) { if (++single >= 200) { bandstart = i + 199; break; } }
+                    else { single = 0; if (R.r[i].n >= 40) lastbig = i; }
+                }
+                xb_last = lastbig; xb_band = bandstart; xb_done = 0;
+            }
+            if (!xb_done && dr && xb_last >= 0 && R.len - 1 < xb_last) {   // the head moving right is past the last big wall
+                xb_done = 1;
+                pr128(out, steps); fprintf(out, " X %c L:", 'A' + s);
+                long nl = L.len < 4 ? L.len : 4;
+                for (long i = L.len - nl; i < L.len; i++) { fputc(' ', out); prb(out, L.r[i].b); if (L.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)L.r[i].n); }
+                fprintf(out, " back "); prb(out, back); fprintf(out, " R:");
+                for (long i = R.len - 1; i > xb_band - 60 && i >= 0; i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
+                fputc('\n', out); fflush(out);
+            }
+        }
         static long endbcount = 0;
         if (getenv("ENDB") && !dr && L.len == 0 && away && (endbcount++ & (getenv("ENDBEVERY") ? atol(getenv("ENDBEVERY")) - 1 : 0)) == 0) {     // end of the first chain: runs between its last run >= T and the band
             static long T = 0; if (!T) T = atol(getenv("ENDB"));
@@ -115,7 +137,9 @@ int main(int argc, char **argv) {
                 for (long j = 0; j < n && j < 4096 && !d; j++) d = pv[j] != R.r[lastbig - 1 - j].b || pc[j] != R.r[lastbig - 1 - j].n;
                 if (d && n < 4096) {
                     for (long j = 0; j < n; j++) { pv[j] = R.r[lastbig - 1 - j].b; pc[j] = R.r[lastbig - 1 - j].n; } pn = n;
-                    pr128(out, steps); fprintf(out, " W%llu", (unsigned long long)R.r[lastbig].n);
+                    long bl = 0; for (long q = bandstart; q >= 0 && R.r[q].n == 1; q--) bl++;
+                    pr128(out, steps); fprintf(out, " W%llu band=%ld", (unsigned long long)R.r[lastbig].n, bl);
+                    if (getenv("BANDHEAD")) { fprintf(out, " bh="); for (long q = bandstart; q > bandstart - 8 && q >= 0; q--) prb(out, R.r[q].b); }
                     for (long j = lastbig - 1; j > bandstart; j--) { fputc(' ', out); prb(out, R.r[j].b); if (R.r[j].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[j].n); }
                     fputc('\n', out); fflush(out);
                 }
