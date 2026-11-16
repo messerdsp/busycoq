@@ -29,7 +29,8 @@ Marks: **[proved]** = checked by `coqc`; **[sim]** = measured with the C tools; 
 
 Assumptions (`Print Assumptions`): only the primitive 63-bit integers and primitive arrays of Rocq's standard
 library (`Uint63`, `PArray`: the operations and their specification axioms such as `add_spec`, `eqb_correct`,
-`get_out_of_bounds`). No axioms of our own. The proof is by `vm_compute` (kernel conversion), no `native_compute`.
+`get_out_of_bounds`). No axioms of our own. The proof is by `vm_compute` (kernel conversion), no `native_compute`. The same primitives are
+used by other busycoq proofs (for example `verify/CTL.v`, `verify/Bouncer_v4.v`, `verify/Bell60.v`).
 
 ## Route
 
