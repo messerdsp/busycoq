@@ -100,11 +100,15 @@ restarted with every wall divided by 16, 64 or 256 (`tools/mkinit.py`, `INIT=`):
 wall 26,445 gives a band of 17,614 blocks and the chain 6,611, 1,650, 402, 100, and the next wall 6,611 a band of
 4,403 and the chain 1,647, 412, 102. The lower, small walls do not follow it this simply.
 
-**Later rewrites of the cascade** (*sim*, `data/scaled_div*.txt`). In the scaled-down runs the new chain later
-rewrites the first frozen unit next to it: with walls divided by 256 and by 1024, when its top wall reaches 22,418
-words, the first band grows by about a third (17,615 -> 23,502 and 4,392 -> 5,878 blocks) and the chain after it
-is replaced by a smaller one. Nothing of this kind happens in the real run up to 10^18 steps. So an overflow is a
-recursive process, and a general rule has to cover these later rewrites too.
+**Later rewrites of the cascade** (*sim*, `data/scaled_div*.txt`, `tools/scalefrozen.py`). In the scaled-down runs
+the new chain later overflows into the frozen cascade: with walls divided by 16, 256 or 1024, when its top wall
+reaches 22,418 words (with walls divided by 16 the new band part sits just after the old band), the first frozen unit (a band of `B` blocks and a chain with top wall `W`) becomes a band of
+about `B + 8W/9` blocks and a chain `W/3, W/12, W/48, ...` (for example `B, W` = 17,615, 6,611 -> 23,502 and the
+chain 2,201, 540, 134). The rule is the same when the first frozen unit is changed by hand before this happens: the
+band and the walls multiplied by 1 or 4 independently (`B, W` = 70,403, 6,611 -> 76,290 and 2,201; 17,615, 26,444
+-> 41,131 and 8,804, 2,159, 538), and the wall moved by -3 to +3. So the frozen cascade behaves like the next digits of a nested
+counter: each overflow of the level below carries into it by a fixed rule. In the real run the new chain started
+differently (its own leftover words differ) and has not overflowed by 10^18 steps.
 
 ## 4. Rocq
 
@@ -126,7 +130,7 @@ the cascade are the likely reason: no small set of local patterns describes them
 2. Births at the end of the chain, next to the fixed tail.
 3. The overflow: when the end of the tape stops absorbing carries (section 3), and the cascade it writes, as a
    rule for a chain of any length (the top walls follow `W -> 2W/3` blocks of band + a chain `W/4, W/16, ...`),
-   including the later rewrites of the frozen cascade seen in scaled-down runs.
+   including the later rewrites of the frozen cascade (`B, W -> B + 8W/9`, chain `W/3, ...` in scaled-down runs).
 4. An invariant on the family of tapes this produces (chains, frozen cascades, leftover words) that excludes
    `1 0 0 0 0 B> 1`, plus the start up to step 2·10^8 by computation.
 
