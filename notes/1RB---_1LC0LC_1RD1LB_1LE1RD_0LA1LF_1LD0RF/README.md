@@ -100,7 +100,10 @@ steps.
 between its last wall of 40 or more words and the band, every 4,096th round start from 2.5·10^15 to 10^18;
 `ENDB=40 ENDBEVERY=4096`). With every wall replaced by one symbol, the 1,081 recorded end states take 480 distinct
 values, the first repeat comes by 2.8·10^15, and over the last 300 states the sequence is periodic with period 536.
-So the end of the new chain runs through a fixed cycle of shapes while its walls grow, and does not reach the young
+At full resolution (every round start, from the tape at step 2,592,545,302,250,949 to 3.2·10^16;
+`data/end_events_new_chain_full_2.59e15_3.2e16.txt.gz`) the end takes 481 distinct shapes, and all 900 shapes sampled later
+up to 10^18 are among them; none ends in the unchanging end word of either overflow. So the end of the new chain runs
+through a fixed finite set of shapes while its walls grow, and does not reach the young
 unit + unchanging end seen before the two overflows. If the cycle is exact, the new chain never overflows; this is
 the kind of statement an invariant can carry. Observed on sampled states, not proved.
 
