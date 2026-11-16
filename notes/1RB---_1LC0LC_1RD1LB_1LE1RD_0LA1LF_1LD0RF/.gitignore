@@ -4,3 +4,4 @@
 *.glob
 .*.aux
 tools/p3_count
+__pycache__/
