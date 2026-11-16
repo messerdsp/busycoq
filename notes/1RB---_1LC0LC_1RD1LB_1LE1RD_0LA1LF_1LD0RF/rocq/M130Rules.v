@@ -282,3 +282,34 @@ Proof.
   - cbn[lpow]. simpl_tape. follow band_pass_1. follow IHn. rewrite lpow_shift'. simpl_tape. finish.
 Qed.
 
+
+(** The left end of the post-overflow chain. Each round starts with the head in state C on the blank cell left of
+    the 14-cell prefix, crosses the prefix into the first wall (prefix_turn), and ends when the sweep back over the
+    first wall (wall_l) reaches the prefix and turns (round_close). *)
+Lemma prefix_turn k r:
+  const 0 {{C}}> [0;1;1;1;1;1;1;1;1;0;1;1;1;0;1] *> [0;1;1;1;0;1]^^k *> [0;1;1;1] *> r -->*
+  const 0 <* [0;0;0;0;0;1;1;1;1;1;1;1] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^k *> r.
+Proof.
+  intros. rewrite (lpow_rotate' [0;1] [0;1;1;1]).
+  es.
+Qed.
+
+Lemma round_close n r:
+  const 0 <* [1;1;1;1;0;1;1;1;1;1;1;1] <{{B}} [1;1;1;0;1;0]^^n *> [1] *> r -->*
+  const 0 {{C}}> [0;1;1;1;1;1;1;1;1;0;1;1;1;0;1] *> [0;1;1;1;0;1]^^n *> [0] *> [1] *> r.
+Proof.
+  intros. rewrite (lpow_rotate' [1;1;1;0;1] [0]).
+  es.
+Qed.
+
+(** A whole round in which unit 1 (phase 0 of its leftover body) turns back: round start to round start. The first
+    wall grows from n+1 to n+2 words and the digit word changes. *)
+Lemma round_u1_0 n r:
+  const 0 {{C}}> [0;1;1;1;1;1;1;1;1;0;1;1;1;0;1] *> [0;1;1;1;0;1]^^(S n) *> [0;1;1;1] *> [0;1;0;1;0;1;0] *> r -->*
+  const 0 {{C}}> [0;1;1;1;1;1;1;1;1;0;1;1;1;0;1] *> [0;1;1;1;0;1]^^(n + 2) *> [0;1;1;1] *> [1;1;1;1;0] *> r.
+Proof.
+  intros. follow prefix_turn. follow u1_case0_round.
+  change (const 0 <* [1;1;1;1;1;1;1] <* [1;1;1;1;0]) with (const 0 <* [1;1;1;1;0;1;1;1;1;1;1;1]).
+  follow round_close.
+  rewrite lpow_add. cbn [lpow]. simpl_tape. finish.
+Qed.
