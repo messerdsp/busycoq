@@ -113,8 +113,10 @@ differently (its own leftover words differ) and has not overflowed by 10^18 step
 ## 4. Rocq
 
 `rocq/M130Rules.v` restates the block rules of the busy-beaver-explorer notes in busycoq and proves them for all
-lengths (17 lemmas: the 15 rules, among them the only way to the halting transition, and the moves of D and F over
-a run of 1s), all by busycoq's symbolic execution. Nothing above the single block moves is formalized yet.
+lengths (the 15 rules, among them the only way to the halting transition, and the moves of D and F over a run of
+1s), all by busycoq's symbolic execution, and adds the first multi-block lemma: the pass to the right over a wall
+of any length (`wall_pass`: each wall word is rewritten in 22 steps as the head moves 6 cells). 19 lemmas, no
+axioms beyond the framework. The digit, carry and overflow steps are not formalized yet.
 
 ## 5. Automatic deciders (negative)
 

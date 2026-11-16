@@ -93,3 +93,23 @@ Lemma b_turn7  l r:
   l <* [0]^^7 {{B}}> [1] *> r -->*
   l <* [1] {{D}}> [1] *> [1]^^6 *> r.
 Proof. es. Qed.
+
+(** The pass to the right over a wall. Seen at a round start the wall is (110101)^n; during the pass the head D
+    sits on the 0 after five 0s, and each 22 steps one wall word is rewritten as 011111 (as the lists are
+    written next to the head: [1;1;1;1;1;0]) and the head moves 6 cells. *)
+Lemma wall_pass_1 l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;0;1;0;1;1;1] *> r -->*
+  l <* [1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> r.
+Proof. es. Qed.
+
+Lemma wall_pass n l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^n *> r -->*
+  l <* [1;1;1;1;1;0]^^n <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> r.
+Proof.
+  gen l r. induction n as [|n IHn]; intros l r.
+  - finish.
+  - cbn[lpow]. simpl_tape.
+    follow wall_pass_1.
+    follow IHn.
+    rewrite lpow_shift'. simpl_tape. finish.
+Qed.
