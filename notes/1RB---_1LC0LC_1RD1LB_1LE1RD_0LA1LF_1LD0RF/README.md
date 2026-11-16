@@ -86,15 +86,15 @@ That ending is still there when the overflow starts at 1.37·10^15: the next car
 at the right end. The event at 1.94·10^8 reported by the busy-beaver-explorer notes is of the same kind (the end
 `34 [10] 5 [10]` becomes `3 [17] 15 [33]` within one round), on a much smaller scale.
 
-**Births use up the end of the tape** (*sim*, `data/end_events_to_1.37e15.txt.gz`,
+**The end of the tape before an overflow** (*sim*, `data/end_events_to_1.37e15.txt.gz`,
 `data/end_events_scaled_div256.txt.gz`). Read as cells, the end of the old chain is a leftover word whose last ~50
-cells never change; new units are born out of the part in front of them. From 4·10^14 to 5.5·10^14 the stretch after
-the last wall shrinks from about 330 cells to about 160 as the last units are born; after that only a growing young
-unit and the unchanging end remain, and the overflow starts when a carry passes the young unit and that end. The
-new chain of the walls-divided-by-256 restart ends the same way: its tail shrinks to a young unit and an unchanging
-end (`...1011111111101010101111111111111`), and its overflow at top wall 22,418 follows; the band next to it is not
-used up. So a chain overflows when the leftover words between it and the band run out. In the real run the new
-chain has not reached that point by 10^18 steps. Observed, not derived.
+cells never change. From 2·10^8 to 10^13 the part after the last wall stays at 132 to 148 cells while units are
+born in front of it; at 5.47·10^14 the end is rewritten once, and from then until the overflow it is a young unit
+(its wall growing from 3 to 12 words) followed by the unchanging end. The overflow starts when a carry passes them.
+The new chain of the walls-divided-by-256 restart ends the same way before its overflow at top wall 22,418 (a young
+unit and the unchanging end `...1011111111101010101111111111111`), and the band next to it is not used up. What
+decides when the end reaches this state is not known; in the real run the new chain has not reached it by 10^18
+steps.
 
 **A rule for the top walls** (*sim*). In the cascade each of the two top walls of the old chain is replaced by a band
 and a fresh chain: a wall of `W` words becomes about `2W/3` blocks of band (`W/6` copies of the 24-cell word)
