@@ -160,17 +160,21 @@ the cascade are the likely reason: no small set of local patterns describes them
 
 ## 6. What a proof would need
 
-1. The counter: round lemmas for a unit in each phase, with and without a carry (the block rules above cover the
-   single moves).
-2. Births at the end of the chain, next to the fixed tail.
-3. The overflow: when the end of the tape stops absorbing carries (section 3), and the cascade it writes, as a
-   rule for a chain of any length; for the real new chain the end runs through a cycle (section 3), which would
-   rule its overflow out (the top walls follow `W -> 2W/3` blocks of band + a chain `W/4, W/16, ...`),
-   including the later rewrites of the frozen cascade (`B, W -> B + 8W/9`, chain `W/3, ...` in scaled-down runs).
-4. An invariant on the family of tapes this produces (chains, frozen cascades, leftover words) that excludes
-   `1 0 0 0 0 B> 1`, plus the start up to step 2·10^8 by computation.
+The observations suggest a two-part proof: the machine reaches the tape after the second overflow, and from there
+it never overflows again, because the end of the new chain cycles.
 
-Step 3 is the new hard part; with the simulator it can be studied on the second overflow and on smaller chains.
+1. *From the second overflow on (an invariant).* Tapes of the form: prefix, the first units with their leftover
+   words, a chain of deep units (any wall lengths, any digit phases), an end in one of the 536 cycle shapes, the band
+   and the frozen cascade unchanged. Closed under one round: the deep-unit rounds are proved (`unit_round_a/b/c`,
+   `unit_carry`); still needed are the rounds of the first units, and one lemma per transition of the end cycle
+   (with the walls in it symbolic, their lengths mod 4 fixed). The halting pattern `1 0 0 0 0 B> 1` cannot occur in
+   such tapes.
+2. *Reaching that tape.* The second overflow is at step 1.4·10^15, far beyond step-by-step computation in Rocq. It
+   needs the first chain as an accelerated counter (rounds skipped arithmetically), its end process up to the
+   overflow, and the overflow itself (the cascade rule for the top walls, section 3). This is the larger part.
+
+Unknown before either is done: whether the cycle of the end holds exactly for all wall lengths (it is observed for
+the lengths that occur to 2·10^17), and whether the first units' leftover words ever change.
 
 ## 7. Reproduce
 
