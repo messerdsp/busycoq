@@ -160,6 +160,17 @@ lengths (the 15 rules, among them the only way to the halting transition, and th
   back: the first wall goes from n+1 to n+2 words and the digit word `0101010` becomes `11110`. It is composed from
   `prefix_turn`, `u1_case0_round` and `round_close`, so the pieces fit together.
 
+`rocq/units/Units.v`: the walls and the segments between them in the post-overflow chain, one lemma per kind of
+event, 39 lemmas proved by `es`. Every wall the rightward pass finishes is followed by a fixed segment, and what the
+pass does there is one of: turn back (*bounce*, ready for `wall_l`), carry on to the next wall (*carry*, in the
+form `wall_pass` starts from), and, on the way back after a carry, cross the carried segment to the wall's left end
+(*sweep*, ready for `wall_l`; the head never reads past the first word of the next wall). Counting walls from the
+left, the "real" units (walls 1, 3, 6, 8, 18, 23, 24, 29, 30, ...) have two bounce statements and one carry
+statement; the short walls inside the leftover segments only ever carry. Found from 1,000 round starts sampled from
+the exact run between steps 2.59·10^15 and 3·10^16 (walls shortened to 30 or 31 words, which changes nothing at the
+ends of the walls): 458,000 wall ends, 47 distinct statements, 39 after removing duplicates
+(`tools/units_ctx3.py`, `units_gen3.py`, `units_sweep.py`, `units_emit.py`).
+
 50 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
 band of any length (one 24-cell word every 228 steps).
 
@@ -201,7 +212,8 @@ it never overflows again, because the end of the new chain cycles.
    534 lemmas in `rocq/end/` (or the band pass, `band_pass`, for the one transition that crosses the band); the sweep
    back to the left end (`wall_l` over each wall). Done: the block rules, `wall_pass`, `wall_l`, `band_pass`, the
    rounds and carries of deep units and of units 1 and 2, and the 534 end transitions. Also done: the turn at the left end (`prefix_turn`, `round_close`)
-   and one whole round composed from the pieces (`round_u1_0`). To do: the band-crossing transition's two ends (entering the band, turning at the
+   and one whole round composed from the pieces (`round_u1_0`); the bounce, carry and sweep lemmas for every wall of
+   the chain left of the end region (`rocq/units/`). To do: compose them into rounds by induction over the walls; the band-crossing transition's two ends (entering the band, turning at the
    first frozen wall); the bookkeeping that turns the tape after a round back into the round-start form (each unit's
    wall grows by one word every other step of its phase, section 1); a wall leaving the end region when it reaches
    40 words; and the closure argument (`progress_nonhalt` over this family). The halting pattern
