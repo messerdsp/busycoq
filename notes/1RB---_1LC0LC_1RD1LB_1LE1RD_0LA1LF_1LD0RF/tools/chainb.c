@@ -8,6 +8,7 @@
 //   EVERY < 0: print every |EVERY|-th round start (first left-end event after the head was away)
 //   env SKEL=1: print a skeleton instead of the tape: runs of >= 3 equal blocks as counts, [n] = n blocks between
 //   env ENDT=T: at round starts, print the end region (runs right of the last run of >= T blocks) when it changes
+//   env INIT=file: start from a printed full line (as written with EVERY < 0); MAXSTEPS then counts from it
 // build: gcc -O2 -o chainb chainb.c
 #include <stdint.h>
 #include <stdio.h>
@@ -64,7 +65,24 @@ int main(int argc, char **argv) {
         tw[s][y] = t[0] - '0'; tmv[s][y] = t[1] == 'R' ? 1 : -1; tn[s][y] = t[2] - 'A';
     }
     Stack L = {0}, R = {0}; int back = 0, s = 0, dr = 1;
-    u128 steps = 0; long ev = 0, nchain = 0, nsingle = 0;
+    u128 steps = 0;
+    if (getenv("INIT")) {      // start from a printed full line: "steps state back run run ..." (head at the left end, moving left)
+        FILE *f = fopen(getenv("INIT"), "r"); if (!f) { fprintf(stderr, "no INIT file\n"); return 2; }
+        static char line[1 << 24]; if (!fgets(line, sizeof line, f)) return 2; fclose(f);
+        char *tok = strtok(line, " \n"); steps = 0; for (char *c = tok; *c; c++) steps = steps * 10 + (*c - '0');
+        tok = strtok(NULL, " \n"); s = tok[0] - 'A'; dr = 0;
+        Run *tmp = NULL; long nt = 0, ct = 0; int first = 1;
+        while ((tok = strtok(NULL, " \n"))) {
+            int b = 0; for (int k = 0; k < K; k++) b |= (tok[k] - '0') << k;
+            uint64_t n = 1; char *c = strchr(tok, '^'); if (c) n = strtoull(c + 1, NULL, 10);
+            if (first) { back = b; first = 0; if (n > 1) { if (nt == ct) { ct = ct ? 2 * ct : 1024; tmp = realloc(tmp, ct * sizeof(Run)); } tmp[nt].b = b; tmp[nt].n = n - 1; nt++; } continue; }
+            if (nt == ct) { ct = ct ? 2 * ct : 1024; tmp = realloc(tmp, ct * sizeof(Run)); }
+            tmp[nt].b = b; tmp[nt].n = n; nt++;
+        }
+        for (long i = nt - 1; i >= 0; i--) push(&R, tmp[i].b, tmp[i].n);
+        free(tmp);
+        MAXS += (double)steps;      // with INIT, MAXSTEPS counts from the initial step
+    } long ev = 0, nchain = 0, nsingle = 0;
     while ((double)steps < MAXS) {
         Stack *F = dr ? &R : &L, *Bk = dr ? &L : &R;
         int fac = F->len ? (int)F->r[F->len - 1].b : 0;

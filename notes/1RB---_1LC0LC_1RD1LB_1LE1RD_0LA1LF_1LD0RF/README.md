@@ -26,6 +26,8 @@ nested base-4 counter with overflows, and follows it exactly to 10^18 steps with
   that runs to 10^18 steps in minutes with no halt; the exact digit words of the counter; and the second overflow,
   which takes the head away from the left end from step 1.3689·10^15 to 2.4869·10^15 and leaves a frozen cascade of
   bands and near copies of the old chain.
+* *Also new*: a numerical rule for what the overflow does to the top walls, checked on scaled-down restarts, and
+  the block rules proved in Rocq (`rocq/M130Rules.v`).
 * *Open*: a rule for what an overflow does to the tape in general, and an invariant that survives it.
 
 ## 1. The counter (*sim*, steps 2·10^8 to 3·10^9)
@@ -84,26 +86,53 @@ That ending is still there when the overflow starts at 1.37·10^15: the next car
 at the right end. The event at 1.94·10^8 reported by the busy-beaver-explorer notes is of the same kind (the end
 `34 [10] 5 [10]` becomes `3 [17] 15 [33]` within one round), on a much smaller scale.
 
-## 4. Automatic deciders (negative)
+**A rule for the top walls** (*sim*). In the cascade each of the two top walls of the old chain is replaced by a band
+and a fresh chain: a wall of `W` words becomes about `2W/3` blocks of band (`W/6` copies of the 24-cell word)
+followed by a chain with walls `W/4, W/16, W/64, ...`:
+
+| wall `W` | band, blocks (`2W/3`) | following chain (`W/4, W/16, W/64`) |
+|---|---|---|
+| 6,769,940 | 4,513,318 (4,513,293) | 1,692,485, 423,118, 105,770 (1,692,485, 423,121, 105,780) |
+| 1,692,473 | 1,128,287 (1,128,315) | 423,113, 105,780, 26,444 (423,118, 105,780, 26,445) |
+
+The same holds when the real tape just before the overflow (`data/pre_overflow_1368863728438429.txt.gz`) is
+restarted with every wall divided by 16, 64 or 256 (`tools/mkinit.py`, `INIT=`): with walls divided by 256 the top
+wall 26,445 gives a band of 17,614 blocks and the chain 6,611, 1,650, 402, 100, and the next wall 6,611 a band of
+4,403 and the chain 1,647, 412, 102. The lower, small walls do not follow it this simply.
+
+**Later rewrites of the cascade** (*sim*, `data/scaled_div*.txt`). In the scaled-down runs the new chain later
+rewrites the first frozen unit next to it: with walls divided by 256 and by 1024, when its top wall reaches 22,418
+words, the first band grows by about a third (17,615 -> 23,502 and 4,392 -> 5,878 blocks) and the chain after it
+is replaced by a smaller one. Nothing of this kind happens in the real run up to 10^18 steps. So an overflow is a
+recursive process, and a general rule has to cover these later rewrites too.
+
+## 4. Rocq
+
+`rocq/M130Rules.v` restates the block rules of the busy-beaver-explorer notes in busycoq and proves them for all
+lengths (17 lemmas: the 15 rules, among them the only way to the halting transition, and the moves of D and F over
+a run of 1s), all by busycoq's symbolic execution. Nothing above the single block moves is formalized yet.
+
+## 5. Automatic deciders (negative)
 
 From the configuration at step 2·10^8 (busycoq's `CPS_LRU` and `RWL_mod` take a simulation prefix), with
 mxdys's FAR (`ccz181078/TM`): `RWL_mod`, 360 parameter sets, and `CPS_LRU`, 880 parameter sets at
 `maxT = 10^6` and 165 at `10^7` (block sizes 1 to 24): no certificate. The leftover words in the first units and
 the cascade are the likely reason: no small set of local patterns describes them.
 
-## 5. What a proof would need
+## 6. What a proof would need
 
 1. The counter: round lemmas for a unit in each phase, with and without a carry (the block rules above cover the
    single moves).
 2. Births at the end of the chain, next to the fixed tail.
 3. The overflow: when the end of the tape stops absorbing carries (section 3), and the cascade it writes, as a
-   rule for a chain of any length.
+   rule for a chain of any length (the top walls follow `W -> 2W/3` blocks of band + a chain `W/4, W/16, ...`),
+   including the later rewrites of the frozen cascade seen in scaled-down runs.
 4. An invariant on the family of tapes this produces (chains, frozen cascades, leftover words) that excludes
    `1 0 0 0 0 B> 1`, plus the start up to step 2·10^8 by computation.
 
 Step 3 is the new hard part; with the simulator it can be studied on the second overflow and on smaller chains.
 
-## 6. Reproduce
+## 7. Reproduce
 
 ```bash
 cd notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/tools
@@ -114,6 +143,14 @@ SKEL=1 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 2.487e15 -1 - | awk '$
 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 1e18 3000000 e18.txt                # to 10^18 (large output)
 ./samp 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 200000000 260000000 1 ev.txt && python3 units.py ev.txt   # section 1
 ./dump 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 1357659723 d.txt                       # direct tape, for checks
+zcat ../data/pre_overflow_1368863728438429.txt.gz > pre.txt && python3 mkinit.py pre.txt v256.txt 'max(n//256, 3)'
+./ovtrips.sh v256.txt 1e15 t256.txt                                                       # scaled-down overflow
+```
+
+Rocq (after `make` in `verify/`):
+
+```bash
+cd notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/rocq && coqc $(cat _CoqProject) M130Rules.v
 ```
 
 Analysis by messerdsp, with Claude Opus 5.5.
