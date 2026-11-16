@@ -103,7 +103,10 @@ values, the first repeat comes by 2.8·10^15, and over the last 300 states the s
 At full resolution (every round start, from the tape at step 2,592,545,302,250,949 to 3.2·10^16;
 `data/end_events_new_chain_full_2.59e15_3.2e16.txt.gz`) the end takes 481 distinct shapes, and all 900 shapes sampled later
 up to 10^18 are among them; none ends in the unchanging end word of either overflow. So the end of the new chain runs
-through a fixed finite set of shapes while its walls grow, and does not reach the young
+through a fixed finite set of shapes while its walls grow. It also behaves as a deterministic system: with each
+wall written as its length mod 4 (and the wall before the end region mod 4), the 537 resulting states each have one
+successor in this window (the only exception is the first record, where the run starts). A deterministic finite
+system is eventually periodic, which matches the period seen in the sampled run. The end does not reach the young
 unit + unchanging end seen before the two overflows. If the cycle is exact, the new chain never overflows; this is
 the kind of statement an invariant can carry. Observed on sampled states, not proved.
 
