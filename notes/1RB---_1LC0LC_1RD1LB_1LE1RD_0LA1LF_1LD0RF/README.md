@@ -171,11 +171,12 @@ the exact run between steps 2.59·10^15 and 3·10^16 (walls shortened to 30 or 3
 ends of the walls): 458,000 wall ends giving 53 bounce or carry statements and 34 sweeps, 39 distinct
 (`tools/units_ctx3.py`, `units_gen3.py`, `units_sweep.py`, `units_emit.py`).
 
-* `enter_D`, `trip_D0`: the cut-form interface for units: a unit is entered in state D on its first cell with `11`
-  to the left; `trip_D0` is a whole trip through a deep unit in phase `D0` (any wall of at least 3 words), from
-  entry to the last exit (state C on the cell left of the unit), composed from `enter_D` and `unit_round_a`.
+* `enter_D`, `enter_D2`, `trip_D0`, `trip_D1`, `trip_D2`: the cut-form interface for units: a unit is entered in
+  state D on its first cell with `11` to the left; `trip_Dp` is a whole trip through a deep unit in phase `Dp` that
+  turns back (any wall of at least 3 words), from entry to the last exit (state C on the cell left of the unit),
+  composed from the entry lemma and `unit_round_a/b/c`.
 
-52 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
+56 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
 band of any length (one 24-cell word every 228 steps).
 
 `rocq/end/E000.v` ... `E053.v`: the end of the post-overflow chain, one lemma per transition. Inside the end region all

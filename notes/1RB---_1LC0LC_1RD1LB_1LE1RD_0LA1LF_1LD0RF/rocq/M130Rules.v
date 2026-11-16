@@ -330,3 +330,31 @@ Lemma trip_D0 n l r:
 Proof.
   intros. follow (enter_D (S n)). simpl_tape. follow unit_round_a. es.
 Qed.
+
+Lemma trip_D1 n l r:
+  l <* [1;1] {{D}}> [0;1;1;1;0;1]^^(S (S (S n))) *> [0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1] *> [0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [0] {{C}}> [1;0;1;0] *> [1;1;1;0;1;0]^^n *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof.
+  intros. follow (enter_D (S n)). simpl_tape. follow unit_round_b. es.
+Qed.
+
+Lemma lshift (xs : list Sym) n (r : side): xs^^n *> xs *> r = xs *> xs^^n *> r.
+Proof.
+  induction n as [|n IH]; cbn [lpow].
+  - reflexivity.
+  - rewrite !Str_app_assoc, IH. reflexivity.
+Qed.
+
+Lemma enter_D2 m l r:
+  l <* [1;1] {{D}}> [0;1;1;1;0;1]^^(S (S m)) *> [0;1;1;1;1;1;1;1] *> r -->*
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^(S m) *> [1;1;1;1] *> r.
+Proof.
+  intros. follow enter_D. cbn [lpow]. rewrite Str_app_assoc. rewrite <- lshift. cbn [Str_app]. apply evstep_refl.
+Qed.
+
+Lemma trip_D2 n l r:
+  l <* [1;1] {{D}}> [0;1;1;1;0;1]^^(S (S (S n))) *> [0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1] *> [0;1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [0] {{C}}> [1;0;1;0] *> [1;1;1;0;1;0]^^(S n) *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> [1;1;0;1] *> r.
+Proof.
+  intros. follow (enter_D2 (S n)). simpl_tape. follow (unit_round_c (S n)). step. step. step. finish.
+Qed.
