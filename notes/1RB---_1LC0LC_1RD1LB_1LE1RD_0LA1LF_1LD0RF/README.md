@@ -100,13 +100,14 @@ steps.
 between its last wall of 40 or more words and the band, every 4,096th round start from 2.5·10^15 to 10^18;
 `ENDB=40 ENDBEVERY=4096`). With every wall replaced by one symbol, the 1,081 recorded end states take 480 distinct
 values, the first repeat comes by 2.8·10^15, and over the last 300 states the sequence is periodic with period 536.
-At full resolution (every round start, from the tape at step 2,592,545,302,250,949 to 3.2·10^16;
-`data/end_events_new_chain_full_2.59e15_3.2e16.txt.gz`) the end takes 481 distinct shapes, and all 900 shapes sampled later
-up to 10^18 are among them; none ends in the unchanging end word of either overflow. So the end of the new chain runs
-through a fixed finite set of shapes while its walls grow. With each wall written as its length mod 4 (and the wall
-before the end region mod 4) the window has 537 states, and the few that repeat in it (13) always have the same
-successor; this is a weak test of determinism, the stronger evidence being the period in the sampled run. The band
-next to the end keeps its length between 4,513,208 and 4,513,230 blocks over the window: it is not used up. The end does not reach the young
+At full resolution (every round start, from the tape at step 2,592,545,302,250,949 to 2.0·10^17;
+`data/end_events_new_chain_full_2.59e15_2e17.txt.gz`, which also records the band's length and first blocks) the
+end takes 536 distinct shapes with each wall written as its length mod 4 (and the wall before the end region mod 4),
+the same number as the period of the sampled run; all 900 shapes sampled later up to 10^18 are among them. 180 of the
+shapes occur more than once in the window, and each of them is always followed by the same next shape: the end
+behaves as a deterministic system running through a cycle of 536 shapes. The band's edge does not enter it: the
+band keeps its length between 4,513,207 and 4,513,230 blocks and its first blocks vary without affecting the shapes.
+The end does not reach the young
 unit + unchanging end seen before the two overflows. If the cycle is exact, the new chain never overflows; this is
 the kind of statement an invariant can carry. Observed on sampled states, not proved.
 
