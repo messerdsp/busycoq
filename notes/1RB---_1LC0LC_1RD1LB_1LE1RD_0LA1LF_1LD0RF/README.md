@@ -218,6 +218,20 @@ it never overflows again, because the end of the new chain cycles.
    wall grows by one word every other step of its phase, section 1); a wall leaving the end region when it reaches
    40 words; and the closure argument (`progress_nonhalt` over this family). The halting pattern
    `1 0 0 0 0 B> 1` does not occur in any of the lemmas' configurations.
+   *The units of the post-overflow chain (sim).* At a round start, cut the tape at every run of at least four words
+   `011101`. Each piece is a wall `(011101)^k` followed by a segment, and every segment is one of four digit heads
+   followed by a fixed tail of its unit's type. The heads are the deep digit words `D0 = (01)^7`,
+   `D1 = (01)^5 1^6`, `D2 = 01^7 (01)^5`, `D3 = 01^7 (01)^3 1^6` (14, 16, 18, 20 cells). A unit steps
+   `D0 -> D2 -> D1 -> D3 -> D0`, its wall gains one word on `D2 -> D1` and on `D3 -> D0`, and on `D3 -> D0` it
+   carries into the next unit. Types from the left: four units with their own tails (`U1` to `U4`; tails of 94, 62
+   and 302 cells for `U2` to `U4`, `U1`'s cycle has the same shape with its own heads), then `K D K D ...`, where
+   `K` has a 116-cell tail and `D` has none; then the end region. Checked on 1,000 sampled round starts and on 70
+   consecutive rounds. Each unit is entered and left the same way: the pass steps onto the unit's first cell in
+   state D with eight 1s to its left, and the last time it leaves to the left it is in state C with `1111101` to the
+   left of the unit and the unit's first cell 0. This gives a uniform interface for a per-unit round-trip lemma and
+   an induction over the units (a carrying unit's lemma takes the next unit's round trip as a hypothesis). The cut
+   points move by a few cells per step, so the induction also needs the rewriting of each unit's new content into
+   the cut form above.
 2. *Reaching that tape.* The second overflow is at step 1.4·10^15, far beyond step-by-step computation in Rocq. It
    needs the first chain as an accelerated counter (rounds skipped arithmetically), its end process up to the
    overflow, and the overflow itself (the cascade rule for the top walls, section 3). This is the larger part.
