@@ -168,7 +168,7 @@ form `wall_pass` starts from), and, on the way back after a carry, cross the car
 left, the "real" units (walls 1, 3, 6, 8, 18, 23, 24, 29, 30, ...) have two bounce statements and one carry
 statement; the short walls inside the leftover segments only ever carry. Found from 1,000 round starts sampled from
 the exact run between steps 2.59·10^15 and 3·10^16 (walls shortened to 30 or 31 words, which changes nothing at the
-ends of the walls): 458,000 wall ends, 47 distinct statements, 39 after removing duplicates
+ends of the walls): 458,000 wall ends giving 53 bounce or carry statements and 34 sweeps, 39 distinct
 (`tools/units_ctx3.py`, `units_gen3.py`, `units_sweep.py`, `units_emit.py`).
 
 50 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
