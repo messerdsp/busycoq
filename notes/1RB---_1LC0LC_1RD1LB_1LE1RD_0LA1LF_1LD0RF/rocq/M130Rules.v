@@ -380,3 +380,88 @@ Proof.
   change ([1;1;1;1;1;0] *> [1;1;1;1;1;0]^^(S (S n)) *> l) with ([1;1;1;1;1;0]^^(S (S (S n))) *> l).
   rewrite wall_regroup. follow wall_l. step. step. step. finish.
 Qed.
+
+(** ** Uniform interface for deep units.
+    A deep unit in cut form is [Wd *> Wd^^m *> Dg p] (wall of m+1 words, digit head of phase p). A trip enters it in
+    state D on its first cell with [1;1] to the left and leaves it for the last time in state C on the cell to its
+    left, leaving [1;0;1] *> Wd^^m' *> Dg p' to the right of that cell; the left neighbour's sweep then supplies the
+    [0;1;1;1] that makes this the cut form [Wd *> Wd^^m' *> Dg p'] again. *)
+Definition Wd : list Sym := [0;1;1;1;0;1].
+Definition Dg (p : nat) : list Sym :=
+  match p with
+  | O => [0;1;0;1;0;1;0;1;0;1;0;1;0;1]
+  | S O => [0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1]
+  | S (S O) => [0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1]
+  | _ => [0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1]
+  end.
+
+Lemma rot_w n (r : side) : [0] *> [1;1;1;0;1;0]^^n *> r = Wd^^n *> [0] *> r.
+Proof. symmetry. apply (lpow_rotate' [1;1;1;0;1] [0]). Qed.
+
+Lemma wd_S n (r : side) : Wd^^n *> Wd *> r = Wd^^(S n) *> r.
+Proof. rewrite lshift. reflexivity. Qed.
+
+Lemma recut_D0 m (s : side):
+  [1;0;1;0] *> [1;1;1;0;1;0]^^m *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> s =
+  [1;0;1] *> Wd^^(S (S m)) *> Dg (S (S O)) *> Wd *> Wd *> s.
+Proof.
+  rewrite <- !wd_S. change [1;0;1;0] with ([1;0;1] ++ [0]). rewrite Str_app_assoc, rot_w.
+  all: try reflexivity.
+Qed.
+
+Lemma tripU_D0 m m2 l r:
+  l <* [1;1] {{D}}> Wd *> Wd^^(S (S m)) *> Dg O *> Wd *> Wd^^(S m2) *> r -->*
+  l <* [0] {{C}}> [1;0;1] *> Wd^^(S (S m)) *> Dg (S (S O)) *> Wd *> Wd^^(S m2) *> r.
+Proof.
+  intros. change (Wd^^(S m2) *> r) with (Wd *> Wd^^m2 *> r). rewrite <- recut_D0.
+  apply (trip_D0 m l (Wd^^m2 *> r)).
+Qed.
+
+Lemma recut_D1 m (s : side):
+  [1;0;1;0] *> [1;1;1;0;1;0]^^m *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1] *> s =
+  [1;0;1] *> Wd^^(S (S m)) *> Dg (S (S (S O))) *> Wd *> Wd *> s.
+Proof.
+  rewrite <- !wd_S. change [1;0;1;0] with ([1;0;1] ++ [0]). rewrite Str_app_assoc, rot_w.
+  all: try reflexivity.
+Qed.
+
+Lemma tripU_D1 m m2 l r:
+  l <* [1;1] {{D}}> Wd *> Wd^^(S (S m)) *> Dg (S O) *> Wd *> Wd^^(S m2) *> r -->*
+  l <* [0] {{C}}> [1;0;1] *> Wd^^(S (S m)) *> Dg (S (S (S O))) *> Wd *> Wd^^(S m2) *> r.
+Proof.
+  intros. change (Wd^^(S m2) *> r) with (Wd *> Wd^^m2 *> r). rewrite <- recut_D1.
+  apply (trip_D1 m l (Wd^^m2 *> r)).
+Qed.
+
+Lemma recut_D2 m (s : side):
+  [1;0;1;0] *> [1;1;1;0;1;0]^^(S m) *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> [1;1;0;1] *> s =
+  [1;0;1] *> Wd^^(S (S (S m))) *> Dg (S O) *> Wd *> Wd *> Wd *> s.
+Proof.
+  rewrite <- !wd_S. change [1;0;1;0] with ([1;0;1] ++ [0]). rewrite Str_app_assoc, rot_w, <- wd_S.
+  all: try reflexivity.
+Qed.
+
+Lemma tripU_D2 m m2 l r:
+  l <* [1;1] {{D}}> Wd *> Wd^^(S (S m)) *> Dg (S (S O)) *> Wd *> Wd^^(S (S m2)) *> r -->*
+  l <* [0] {{C}}> [1;0;1] *> Wd^^(S (S (S m))) *> Dg (S O) *> Wd *> Wd^^(S (S m2)) *> r.
+Proof.
+  intros. change (Wd^^(S (S m2)) *> r) with (Wd *> Wd *> Wd^^m2 *> r). rewrite <- recut_D2.
+  apply (trip_D2 m l (Wd^^m2 *> r)).
+Qed.
+
+Lemma recut_D3 m (s : side):
+  [1;0;1;0] *> [1;1;1;0;1;0]^^m *> [1] *> [0;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1] *> [0;1] *> s =
+  [1;0;1] *> Wd^^m *> Dg O *> Wd *> s.
+Proof.
+  change [1;0;1;0] with ([1;0;1] ++ [0]). rewrite Str_app_assoc, rot_w. reflexivity.
+Qed.
+
+(** The carrying phase, with the next unit's trip (in the same uniform form) as hypothesis. *)
+Lemma tripU_D3 m U V l r:
+  (forall l r, l <* [1;1] {{D}}> U *> r -->* l <* [0] {{C}}> [1;0;1] *> V *> r) ->
+  l <* [1;1] {{D}}> Wd *> Wd^^(S (S m)) *> Dg (S (S (S O))) *> U *> r -->*
+  l <* [0] {{C}}> [1;0;1] *> Wd^^(S (S (S m))) *> Dg O *> Wd *> V *> r.
+Proof.
+  intros H. rewrite <- recut_D3.
+  apply (trip_D3 m U ([0;1] ++ V) l r). exact H.
+Qed.

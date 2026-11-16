@@ -178,8 +178,14 @@ ends of the walls): 458,000 wall ends giving 53 bounce or carry statements and 3
   trip (any unit with the same entry and exit interface) as a hypothesis, so trips nest; pieces `carry_A` (pass to
   the next unit's first cell) and `carry_B` (sweep back to the wall). With these four, a whole round through a run
   of deep units follows by induction over the units.
+* `tripU_D0` ... `tripU_D3`: the same four trips in one uniform form. A deep unit is `Wd *> Wd^^m *> Dg p`
+  (wall of m+1 words `Wd = 011101`, digit head `Dg p`). Entered in state D with `11` to the left, it is left for the
+  last time in state C with `[1;0;1] *> Wd^^m' *> Dg p'` to the right of the head, which is the cut form of the next
+  phase once the left neighbour supplies its `0111`: `D0 -> D2`, `D1 -> D3` (same m), `D2 -> D1`, `D3 -> D0`
+  (m + 1), and `tripU_D3` takes the next unit's trip in the same form as hypothesis. This is the counter rule of
+  section 6 for deep units, now proved (`recut_D0` ... `recut_D3` are the tape identities).
 
-59 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
+68 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
 band of any length (one 24-cell word every 228 steps).
 
 `rocq/end/E000.v` ... `E053.v`: the end of the post-overflow chain, one lemma per transition. Inside the end region all
