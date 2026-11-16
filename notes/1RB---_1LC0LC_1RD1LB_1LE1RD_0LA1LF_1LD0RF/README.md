@@ -161,7 +161,12 @@ records the configuration at that moment (713 times from the tape at step 2,592,
 distinct, `data/end_entries_2.59e15_2e17.txt.gz`); `tools/xlemma.py` simulates each one until the head leaves the end
 region to the left and states it as a lemma over the cells the head visits (the rest of the tape, including the big
 walls on the left, is arbitrary), and `es` proves it. 534 lemmas, all proved (`tools/xbatch.py`, `tools/xcompile.sh`,
-about 25 minutes on 4 cores); the remaining transition runs past the 60 recorded band blocks and needs a wider capture.
+about 25 minutes on 4 cores). The remaining transition (at step 5,269,793,291,944,956, the only one of its kind
+to 2·10^17) is different: the carry runs through the whole band (about 4.5 million blocks) to the first frozen
+wall and back. Comparing the tape at the round starts just before and after it, the band ends up shifted (its
+blocks are rotated by 2 cells), the first frozen wall's leading cells change, and the 1.5 million runs of the
+frozen cascade beyond it are unchanged. A proof needs one more lemma for it: the pass over the band, which is a
+periodic 24-cell word, so a shift rule like `wall_pass`.
 
 Not formalized yet: the prefix, the link between these pieces (the invariant), and reaching the second overflow.
 
