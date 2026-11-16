@@ -174,9 +174,12 @@ ends of the walls): 458,000 wall ends giving 53 bounce or carry statements and 3
 * `enter_D`, `enter_D2`, `trip_D0`, `trip_D1`, `trip_D2`: the cut-form interface for units: a unit is entered in
   state D on its first cell with `11` to the left; `trip_Dp` is a whole trip through a deep unit in phase `Dp` that
   turns back (any wall of at least 3 words), from entry to the last exit (state C on the cell left of the unit),
-  composed from the entry lemma and `unit_round_a/b/c`.
+  composed from the entry lemma and `unit_round_a/b/c`. `trip_D3` is the carrying phase: it takes the next unit's
+  trip (any unit with the same entry and exit interface) as a hypothesis, so trips nest; pieces `carry_A` (pass to
+  the next unit's first cell) and `carry_B` (sweep back to the wall). With these four, a whole round through a run
+  of deep units follows by induction over the units.
 
-56 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
+59 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
 band of any length (one 24-cell word every 228 steps).
 
 `rocq/end/E000.v` ... `E053.v`: the end of the post-overflow chain, one lemma per transition. Inside the end region all

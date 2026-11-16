@@ -358,3 +358,25 @@ Lemma trip_D2 n l r:
 Proof.
   intros. follow (enter_D2 (S n)). simpl_tape. follow (unit_round_c (S n)). step. step. step. finish.
 Qed.
+
+(** A deep unit in phase D3 carries: the pass reaches the next unit's first cell in state D with [1;1] to the left
+    (carry_A), the next unit makes its trip, and the sweep back (carry_B) brings the head to the wall. *)
+Lemma carry_A l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1] *> r -->*
+  l <* [1;1;1;1;1;0] <* [1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0] {{D}}> r.
+Proof. es. Qed.
+
+Lemma carry_B l r:
+  l <* [0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0] {{C}}> [1] *> r -->*
+  l <* [1;1;1;1;0] {{C}}> [1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1] *> r.
+Proof. es. Qed.
+
+Lemma trip_D3 n U' V' l r:
+  (forall l r, l <* [1;1] {{D}}> U' *> r -->* l <* [0] {{C}}> [1] *> V' *> r) ->
+  l <* [1;1] {{D}}> [0;1;1;1;0;1]^^(S (S (S n))) *> [0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1] *> U' *> r -->*
+  l <* [0] {{C}}> [1;0;1;0] *> [1;1;1;0;1;0]^^(S (S (S n))) *> [1] *> [0;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1] *> V' *> r.
+Proof.
+  intros H. follow (enter_D2 (S n)). follow wall_pass. follow carry_A. follow H. follow carry_B.
+  change ([1;1;1;1;1;0] *> [1;1;1;1;1;0]^^(S (S n)) *> l) with ([1;1;1;1;1;0]^^(S (S (S n))) *> l).
+  rewrite wall_regroup. follow wall_l. step. step. step. finish.
+Qed.
