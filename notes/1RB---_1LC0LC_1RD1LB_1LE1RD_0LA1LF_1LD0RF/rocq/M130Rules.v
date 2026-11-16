@@ -266,3 +266,19 @@ Lemma u2_case2_round n l r:
   l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^(S n) *> [1;1;1;1;0;1;0;1;0;1;0;1;0;1;0] *> r -->*
   l <* [1;1;1;1;0] <{{B}} [1;1;1;0;1;0]^^n *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0] *> r.
 Proof. follow wall_pass. cbn[lpow]. simpl_tape. follow u2_case2. rewrite wall_regroup. follow wall_l. finish. Qed.
+
+(** The pass to the right over the band left by the second overflow: the band is a periodic 24-cell word; every 228
+    steps the head moves one word (found in the end transition at step 5,269,793,291,944,956, the only one to 2·10^17
+    that crosses the whole band). *)
+Lemma band_pass_1 l r:
+  l <* [1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1;1;1;0;1;1] {{D}}> [0;1;0;1;0;1;1;1;0;1;0;1;0;1;1;1;0;1;0;1;0;1;1;1] *> r -->* l <* [1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1] <* [1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1;1;1;0;1;1] {{D}}> r.
+Proof. es. Qed.
+
+Lemma band_pass n l r:
+  l <* [1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1;1;1;0;1;1] {{D}}> [0;1;0;1;0;1;1;1;0;1;0;1;0;1;1;1;0;1;0;1;0;1;1;1]^^n *> r -->* l <* [1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1]^^n <* [1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1;1;1;0;1;1] {{D}}> r.
+Proof.
+  gen l r. induction n as [|n IHn]; intros l r.
+  - finish.
+  - cbn[lpow]. simpl_tape. follow band_pass_1. follow IHn. rewrite lpow_shift'. simpl_tape. finish.
+Qed.
+
