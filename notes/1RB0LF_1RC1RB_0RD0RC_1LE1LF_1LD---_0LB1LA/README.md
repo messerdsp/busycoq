@@ -625,6 +625,13 @@ But in the first test every one of the 20 runs gets stuck within 80 phases at an
 starts with none of `00`, `101`, `11`). So staying alive depends on the exact value of `b`, the "sync" of the class
 name, and any proof of the global part has to track `b` exactly (as the marker bits above).
 
+No hidden formula in the run lengths either (*sim*, the 8,804 runs of length 6 or more between `z3` gaps in the exact
+tape at phase 20,000, `data/state20000.txt.gz`): 54.9% are odd, the residues mod 3 are uniform (0.337, 0.335,
+0.328), mod 4 slightly uneven (0.216, 0.282, 0.235, 0.266), and the parities of consecutive runs are close to
+independent (pairs 00, 01, 10, 11: 0.214, 0.237, 0.237, 0.312). So the runs a wave meets look like a slightly biased
+coin, not like the output of a simple rule, and an invariant on the word alone is ruled out by the random-`b` test
+above: it would have to hold for the reachable words with any `b`, and those runs reach a bad overflow.
+
 Why, and a candidate invariant. Parse `r` from its start (state t1) until the parse fails. At a failure in state
 t0 the next 4 cells are not a t0 digit; of the 12 such patterns, the 5 that contain no run of length 1 (`1100`,
 `1111`, `1110`, `1101`, `0001`) are exactly the right halves of the t0 windows. At a failure in state t1 the next

@@ -1,5 +1,5 @@
 // C port of lowsim.py (with msim.py's macro step M.mstep for T37): same arithmetic, same output files.
-// usage: lowsim_c STATE.txt.gz N K MAXPH OUT [LOWN]     env: FILL, JUMP=1 as for lowsim.py; NOFILL=1 keeps b exact (with a large N: the exact run); STATS=1 prints counts;
+// usage: lowsim_c STATE.txt.gz N K MAXPH OUT [LOWN]     env: FILL, JUMP=1 as for lowsim.py; NOFILL=1 keeps b exact (with a large N: the exact run); TOPN=n logs the top n tokens per phase to OUT.top; SAVE=prefix SAVEEVERY=k writes the exact state every k phases; STATS=1 prints counts;
 // SLOW=1 uses the plain cell-by-cell sweep (as msim.py), SLOW=2 the 8-cell block sweep, default the 16-cell window sweep.
 // The output files are byte-identical to lowsim.py's (checked on 29,520 phases from data/state20000.txt.gz, N = 3000).
 // Build: gcc -O3 -march=native -o lowsim_c lowsim_c.c -lgmp -lz
@@ -368,6 +368,26 @@ int main(int argc, char **argv) {
         }
         if (k != K_OV) continue;
         if (refill) fill(Bv);
+        {   // optional: top tokens per phase (TOPN), full exact state every SAVEEVERY phases (SAVE=prefix)
+            static Toks Ta = {0}; static FILE *topf = NULL; static long long topn = -1, severy = 0; static const char *spre = NULL;
+            if (topn < 0) { topn = getenv("TOPN") ? atoll(getenv("TOPN")) : 0; spre = getenv("SAVE"); severy = getenv("SAVEEVERY") ? atoll(getenv("SAVEEVERY")) : 0;
+                if (topn) { char f2[4096]; snprintf(f2, sizeof f2, "%s.top", OUT); topf = fopen(f2, "w"); } }
+            int need_top = topn > 0, need_save = spre && severy && nov % severy == 0;
+            if (need_top || need_save) toks_of(B + off, hi - off, &Ta);
+            if (need_top) {
+                long long from = Ta.n - topn; if (from < 0) from = 0;
+                fprintf(topf, "%lld %zu %llx ", nov, mpz_sizeinbase(Bv, 2), (unsigned long long)mpz_getlimbn(Bv, 0));
+                write_toks(topf, &Ta, from, Ta.n); fputc('\n', topf); if (nov % 100 == 0) fflush(topf);
+            }
+            if (need_save) {
+                char fn2[4096]; snprintf(fn2, sizeof fn2, "%s%lld.txt.gz", spre, nov);
+                gzFile gz = gzopen(fn2, "wb");
+                char *ah = mpz_get_str(NULL, 16, A), *bh = mpz_get_str(NULL, 16, Bv);
+                gzprintf(gz, "nov %lld\nmode %c\na %s\n", nov, modeR ? 'R' : 'L', ah); gzputs(gz, "b "); gzputs(gz, bh); gzputs(gz, "\nr");
+                for (long long i = 0; i < Ta.n; i++) gzprintf(gz, " %c%lld", Ta.z[i], Ta.len[i]);
+                gzputs(gz, "\n"); gzclose(gz); free(ah); free(bh);
+            }
+        }
         long long n = hi - off; if (n > 4000000) n = 4000000;
         toks_of(B + off, n, &T);
         fprintf(out, "%lld ", nov); write_toks(out, &T, 0, LOWN); fputc('\n', out);
