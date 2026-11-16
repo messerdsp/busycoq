@@ -5,7 +5,10 @@ The Busy Beaver problem asks which n-state Turing machines halt when started on 
 about 600 machines are still open. This is a study of one of them (bbchallenge id 130302): it describes the run as a
 nested base-4 counter with overflows, and follows it exactly to 10^18 steps with an accelerated simulator.
 
-**Status: open.** Not proved non-halting yet. Proved in Rocq: the block rules and round pieces (section 4), and that the machine reaches the tape after the second overflow (`PART3.md`). The rest is checked by simulation (*sim*).
+**Status: open.** Not proved non-halting yet. Proved in Rocq: the block rules, the round of the post-overflow chain
+for any unit list (section 4, `rocq/round/`), and that the machine reaches the tape after the second overflow
+(`PART3.md`). The rest is checked by simulation (*sim*). Exact simulation shows that the end of the new chain uses up
+the band slowly (section 3), so the planned closure argument does not give non-halting (section 6).
 
 | state | read 0 | read 1 |
 |---|---|---|
@@ -28,7 +31,9 @@ nested base-4 counter with overflows, and follows it exactly to 10^18 steps with
   bands and near copies of the old chain.
 * *Also new*: a numerical rule for what the overflow does to the top walls, checked on scaled-down restarts, and
   the block rules proved in Rocq (`rocq/M130Rules.v`).
-* *Open*: a rule for what an overflow does to the tape in general, and an invariant that survives it.
+* *Open*: a rule for what an overflow does to the tape in general, and an invariant that survives it. The end of the
+  new chain cycles but eats 4 band words per cycle (section 3), so the next overflow does come, after about 282,000
+  cycles.
 
 ## 1. The counter (*sim*, steps 2·10^8 to 3·10^9)
 
@@ -109,7 +114,31 @@ behaves as a deterministic system running through a cycle of 536 shapes. The ban
 band keeps its length between 4,513,207 and 4,513,230 blocks and its first blocks vary without affecting the shapes.
 The end does not reach the young
 unit + unchanging end seen before the two overflows. If the cycle is exact, the new chain never overflows; this is
-the kind of statement an invariant can carry. Observed on sampled states, not proved.
+the kind of statement an invariant can carry. Observed on sampled states, not proved. *But see the next paragraph:
+the cycle uses up the band.*
+
+**The end region eats the band** (*sim, exact*; `tools/end_period.py`). Cut the tape at a round start into the
+regular units of section 6 (U1..U4, then K, D, K, D, ..., any wall of at least 3 words; the words are in
+`tools/trips_gen.py`), the end word `E` (from the last regular unit to the band), the band and the frozen cascade.
+`E` changes only when every regular unit carries, and then by one trip in the unit interface, so its visits can be
+simulated one after another, exactly, without the regular units (the band is kept at a few dozen words: the pass
+over it is uniform). Checked against the accelerated run: from the real tape at step 5,269,000,298,949,519, one
+visit (the band crossing) gives exactly the end word of the real tape at 5,271,000,331,149,223. From the tape at
+step 2,592,545,302,250,949:
+
+* every 72 visits `E` returns exactly to its value at that step;
+* in each period a K unit (wall 33 words, visit 13) and a D unit (wall 5 words, visit 21) leave `E` and join the
+  regular chain, and one visit (34th) crosses the band and the whole first frozen wall (1,692,491 blocks) and turns
+  just after it;
+* per period the band's left edge moves 84 cells to the right (the start of `E` moves 72·4 = 288 cells to the left,
+  the two new units take 372 cells off its front) and its right edge 12 cells to the left: **the band loses 96
+  cells (4 words) per period**. The real run agrees: 1,128,303 band words at 2.59·10^15, 1,128,298 at 10^17, which
+  is two periods later (the tape at 10^17 has the end word of visit 94).
+
+So the cycle of end shapes above is real, but the band is not part of an invariant: after about 282,000 periods
+(each takes 16 times as many rounds as the one before, since it adds two base-4 units) the end reaches the first
+frozen wall, and what happens then is an overflow into the frozen cascade of the kind seen in the scaled-down runs.
+With a band of 12 words the same simulation shows the end leaving the cycle once the band is gone.
 
 **A rule for the top walls** (*sim*). In the cascade each of the two top walls of the old chain is replaced by a band
 and a fresh chain: a wall of `W` words becomes about `2W/3` blocks of band (`W/6` copies of the 24-cell word)
@@ -233,8 +262,13 @@ the cascade are the likely reason: no small set of local patterns describes them
 
 ## 6. What a proof would need
 
-The observations suggest a two-part proof: the machine reaches the tape after the second overflow, and from there
-it never overflows again, because the end of the new chain cycles.
+The observations suggested a two-part proof: the machine reaches the tape after the second overflow, and from there
+it never overflows again, because the end of the new chain cycles. **This plan cannot be completed as stated**: the
+end cycle consumes the band (section 3, *The end region eats the band*), so a family "regular chain + end in its
+cycle + band of any length + fixed cascade" is not closed. Following it gives at most a proof that the machine does
+not halt for the next ~282,000 end periods. A non-halting proof also has to describe what happens when the band runs
+out (an overflow into the frozen cascade) and every later overflow, i.e. an invariant for the nested counter as a
+whole. The plan below is kept for the parts that remain useful (the regular chain is now proved, `rocq/round/`).
 
 1. *From the second overflow on (an invariant), at round starts.* A tape of the form
 
@@ -278,8 +312,9 @@ it never overflows again, because the end of the new chain cycles.
    needs the first chain as an accelerated counter (rounds skipped arithmetically), its end process up to the
    overflow, and the overflow itself (the cascade rule for the top walls, section 3). This is the larger part.
 
-The end cycle is observed for the transitions that occur to 2·10^17; the closure argument would check that every
-successor of a covered state is covered.
+The end cycle is observed for the transitions that occur to 2·10^17, and the exact simulation of section 3 shows it
+repeating with period 72 end visits while the band shrinks; a closure argument over a family with a fixed band
+fails for that reason.
 
 ## 7. Reproduce
 
@@ -294,6 +329,8 @@ SKEL=1 ./chainb 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 2.487e15 -1 - | awk '$
 ./dump 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 1357659723 d.txt                       # direct tape, for checks
 zcat ../data/pre_overflow_1368863728438429.txt.gz > pre.txt && python3 mkinit.py pre.txt v256.txt 'max(n//256, 3)'
 ./ovtrips.sh v256.txt 1e15 t256.txt                                                       # scaled-down overflow
+gcc -O2 -o p3_count p3_count.c && DUMP=init26.txt ./p3_count 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 2592545302250949
+python3 end_period.py init26.txt 30 150 150                                             # the end period (minutes)
 ```
 
 Rocq (after `make` in `verify/`):
