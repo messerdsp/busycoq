@@ -132,3 +132,37 @@ Lemma digit_bounce_c l r:
   l <* [1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> r -->*
   l <* [1;1;1;1;0] {{C}}> [1;1;1;0;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> r.
 Proof. es. Qed.
+
+(** The fourth phase carries: the head runs on to the next wall, in the form [wall_pass] starts from. *)
+Lemma digit_carry l r:
+  l <* [1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;0;1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof. es. Qed.
+
+Lemma wall_regroup k (l:side):
+  l <* [1;1;1;1;1;0]^^k <* [1;1;1;1;0] = l <* [1;1;1;1;0] <* [1;1;1;1;0;1]^^k.
+Proof. symmetry. apply (lpow_rotate' [1] [1;1;1;1;0]). Qed.
+
+(** One round through a deep unit in phase a: pass over the wall (n+1 words), turn back at the digit, sweep back. *)
+Lemma unit_round_a n l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^(S n) *> [0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [1;1;1;1;0] <{{B}} [1;1;1;0;1;0]^^n *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof. follow wall_pass. cbn[lpow]. simpl_tape. follow digit_bounce_a. rewrite wall_regroup. follow wall_l. finish. Qed.
+
+(** One round through a deep unit in phase b: pass over the wall (n+1 words), turn back at the digit, sweep back. *)
+Lemma unit_round_b n l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^(S n) *> [0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [1;1;1;1;0] <{{B}} [1;1;1;0;1;0]^^n *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof. follow wall_pass. cbn[lpow]. simpl_tape. follow digit_bounce_b. rewrite wall_regroup. follow wall_l. finish. Qed.
+
+(** One round through a deep unit in phase c: pass over the wall (n+1 words), turn back at the digit, sweep back. *)
+Lemma unit_round_c n l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^(S n) *> [1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> r -->*
+  l <* [1;1;1;1;0] <{{B}} [1;1;1;0;1;0]^^n *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> r.
+Proof. follow wall_pass. cbn[lpow]. simpl_tape. follow digit_bounce_c. rewrite wall_regroup. follow wall_l. finish. Qed.
+
+(** A deep unit in the carrying phase: pass over its wall, carry through the digit, arrive at the next wall. *)
+Lemma unit_carry n l r:
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^(S n) *> [1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [1;1;1;1;1;0]^^n <* [1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;0;1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof. follow wall_pass. cbn[lpow]. simpl_tape. follow digit_carry. finish. Qed.

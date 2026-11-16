@@ -114,11 +114,17 @@ differently (its own leftover words differ) and has not overflowed by 10^18 step
 
 `rocq/M130Rules.v` restates the block rules of the busy-beaver-explorer notes in busycoq and proves them for all
 lengths (the 15 rules, among them the only way to the halting transition, and the moves of D and F over a run of
-1s), all by busycoq's symbolic execution, and adds the first multi-block lemma: the pass to the right over a wall
-of any length (`wall_pass`: each wall word is rewritten in 22 steps as the head moves 6 cells) and the three
-non-carrying phases of a deep digit (`digit_bounce_a/b/c`: the head turns back into the wall, ready for `wall_l`).
-22 lemmas, closed under the global context (no axioms). The carrying phase, the leftover words, the end of the
-chain and the overflow are not formalized yet.
+1s), all by busycoq's symbolic execution, and builds the round through a deep unit on them:
+
+* `wall_pass`: the pass to the right over a wall of any length (each wall word is rewritten in 22 steps as the head
+  moves 6 cells);
+* `digit_bounce_a/b/c`: the three phases of a deep digit that turn the head back, and `digit_carry`, the phase that
+  carries on to the next wall (digit words as found at step 10^11 in the deepest units);
+* `unit_round_a/b/c`: a whole round through a deep unit with a wall of any length: pass, turn back, sweep back
+  (`wall_l`); `unit_carry`: pass and carry into the next unit.
+
+28 lemmas, closed under the global context (no axioms). Not formalized yet: the prefix and the leftover words of
+the first units, the end of the chain, the overflow, and the invariant that ties them together.
 
 ## 5. Automatic deciders (negative)
 
