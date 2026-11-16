@@ -113,3 +113,22 @@ Proof.
     follow IHn.
     rewrite lpow_shift'. simpl_tape. finish.
 Qed.
+
+(** A deep digit that does not carry. The pass has crossed the wall (head D on the 0 after 00000, the last wall word
+    011111 to its left); the digit and the start of the next wall follow. Three of the four phases turn the head
+    back: it ends in C on the last cell of that wall word, ready for the sweep to the left ([wall_l]); the digit is
+    rewritten to the next phase. Digit words as found at step 10^11 in the deepest units. *)
+Lemma digit_bounce_a l r:
+  l <* [1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [1;1;1;1;0] {{C}}> [1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof. es. Qed.
+
+Lemma digit_bounce_b l r:
+  l <* [1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [1;1;1;1;0] {{C}}> [1;1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof. es. Qed.
+
+Lemma digit_bounce_c l r:
+  l <* [1;1;1;1;1;0] <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> r -->*
+  l <* [1;1;1;1;0] {{C}}> [1;1;1;0;1;0;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1] *> r.
+Proof. es. Qed.
