@@ -5,7 +5,7 @@ The Busy Beaver problem asks which n-state Turing machines halt when started on 
 about 600 machines are still open. This is a study of one of them (bbchallenge id 130302): it describes the run as a
 nested base-4 counter with overflows, and follows it exactly to 10^18 steps with an accelerated simulator.
 
-**Status: open.** No proof here. Everything below was checked by simulation (*sim*); nothing is proved.
+**Status: open.** Not proved non-halting yet. Proved in Rocq: the block rules and round pieces (section 4), and that the machine reaches the tape after the second overflow (`PART3.md`). The rest is checked by simulation (*sim*).
 
 | state | read 0 | read 1 |
 |---|---|---|
@@ -240,7 +240,7 @@ it never overflows again, because the end of the new chain cycles.
    2.59·10^15 and 3·10^16, walls shortened to 30 or 31 words), about 84,000 unit steps, no exception
    (`tools/units_rsc.c`: direct simulation printing round starts; `tools/units_model.py`: the check). So the tape
    at round starts is a plain counter: no tails move, and the cut points move only because walls grow.
-2. *Reaching that tape.* The second overflow is at step 1.4·10^15, far beyond step-by-step computation in Rocq. It
+2. *Reaching that tape.* **Done** (`PART3.md`, `rocq/p3/`): a verified block simulator run by `vm_compute` proves that the blank tape reaches the round start at step 2,592,545,302,250,949 (1.81·10^9 macro steps, about 15 minutes to check). The text below is the earlier plan. The second overflow is at step 1.4·10^15, far beyond step-by-step computation in Rocq. It
    needs the first chain as an accelerated counter (rounds skipped arithmetically), its end process up to the
    overflow, and the overflow itself (the cascade rule for the top walls, section 3). This is the larger part.
 
