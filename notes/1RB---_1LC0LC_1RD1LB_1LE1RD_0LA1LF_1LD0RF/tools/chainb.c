@@ -1,19 +1,8 @@
 // Chain simulator with a back block: tape = L stack | back | R stack (runs of K-cell blocks); the head sits at the
 // boundary between `back` and the facing block. A macro step simulates the machine on the 2K-cell window
 // [back, facing] (in tape order) until the head leaves it. A run of identical facing blocks is crossed at once when
-// one copy returns the same state, direction and back block. Exact: checked cell for cell against direct simulation.
-// usage: chainb MACHINE MAXSTEPS EVERY OUT
-//   EVERY > 0: print every EVERY-th left-end event (head moving left with nothing nonblank to its left)
-//   EVERY = 0: print when the pattern of the rightmost NB (25) runs changes
-//   EVERY < 0: print every |EVERY|-th round start (first left-end event after the head was away)
-//   env SKEL=1: print a skeleton instead of the tape: runs of >= 3 equal blocks as counts, [n] = n blocks between
-//   env ENDT=T: at round starts, print the end region (runs right of the last run of >= T blocks) when it changes
-//   env ENDB=T [ENDBEVERY=k]: at round starts (every k-th), print the end of the first chain (runs between its
-//     last run of >= T blocks and the band) when it changes
-//   env XEND=1: once per round, when the head moving right passes the chain's last wall of >= 40 words, print
-//     the configuration (L runs, back block, R runs to 60 blocks into the band): the start of an end transition
-//   env INIT=file: start from a printed full line (as written with EVERY < 0); MAXSTEPS then counts from it
-// build: gcc -O2 -o chainb chainb.c
+// one copy returns the same state, direction and back block. Exact.
+// usage: chainb MACHINE MAXSTEPS EVERY OUT   (EVERY = 0: print only when the bottom 60 runs of R change pattern)
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,6 +92,11 @@ int main(int argc, char **argv) {
             s = x->ns; dr = x->exitR;
         }
         static int away = 1;
+        if (getenv("PRINTAT") && !dr && L.len == 0 && away && (double)steps > atof(getenv("PRINTAT"))) {
+            pr128(out, steps); fprintf(out, " %c ", 'A' + s); prb(out, back);
+            for (long i = R.len - 1; i >= 0; i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
+            fputc('\n', out); fflush(out); return 0;
+        }
         static long xb_last = -1, xb_band = -1; static int xb_done = 1;
         if (getenv("XEND")) {
             if (!dr && L.len == 0 && away) {           // round start: locate the last big wall and the band
@@ -119,7 +113,7 @@ int main(int argc, char **argv) {
                 long nl = L.len < 4 ? L.len : 4;
                 for (long i = L.len - nl; i < L.len; i++) { fputc(' ', out); prb(out, L.r[i].b); if (L.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)L.r[i].n); }
                 fprintf(out, " back "); prb(out, back); fprintf(out, " R:");
-                for (long i = R.len - 1; i > xb_band - 60 && i >= 0; i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
+                for (long i = R.len - 1; i > xb_band - (getenv("XBAND") ? atol(getenv("XBAND")) : 60) && i >= 0; i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
                 fputc('\n', out); fflush(out);
             }
         }
@@ -185,7 +179,8 @@ int main(int argc, char **argv) {
             } else show = ev++ % EVERY == 0;
             if (show) {
                 pr128(out, steps); fprintf(out, " %c ", 'A' + s); prb(out, back);
-                for (long i = R.len - 1; i >= 0; i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
+                static long hr = -2; if (hr == -2) hr = getenv("HEADRUNS") ? atol(getenv("HEADRUNS")) : -1;   // print only the first hr runs
+                for (long i = R.len - 1; i >= 0 && (hr < 0 || i >= R.len - hr); i--) { fputc(' ', out); prb(out, R.r[i].b); if (R.r[i].n > 1) fprintf(out, "^%llu", (unsigned long long)R.r[i].n); }
                 fputc('\n', out); fflush(out);
             }
         }
