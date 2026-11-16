@@ -185,7 +185,7 @@ ends of the walls): 458,000 wall ends giving 53 bounce or carry statements and 3
   (m + 1), and `tripU_D3` takes the next unit's trip in the same form as hypothesis. This is the counter rule of
   section 6 for deep units, now proved (`recut_D0` ... `recut_D3` are the tape identities).
 
-68 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
+69 lemmas, closed under the global context (no axioms), among them `band_pass`: the pass to the right over the
 band of any length (one 24-cell word every 228 steps).
 
 `rocq/end/E000.v` ... `E053.v`: the end of the post-overflow chain, one lemma per transition. Inside the end region all
