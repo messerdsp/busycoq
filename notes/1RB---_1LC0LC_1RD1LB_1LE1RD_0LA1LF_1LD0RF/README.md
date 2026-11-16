@@ -232,6 +232,14 @@ it never overflows again, because the end of the new chain cycles.
    an induction over the units (a carrying unit's lemma takes the next unit's round trip as a hypothesis). The cut
    points move by a few cells per step, so the induction also needs the rewriting of each unit's new content into
    the cut form above.
+   *The round map in this form (sim, exact).* Write the tape at a round start as the prefix followed by units
+   `W^k D T` (wall, digit head, the unit's fixed tail). Then one round is exactly: unit 1 steps; unit `j+1` steps
+   when unit `j` goes `D3 -> D0`; a unit that steps goes to the next phase, and its wall gains one word on
+   `D2 -> D1` and `D3 -> D0`; nothing else changes. Unit 1 has its own four heads (32, 36, 34, 38 cells, same
+   cycle and wall rule). Checked on 10,000 consecutive rounds (2,000 each from five sampled round starts between
+   2.59·10^15 and 3·10^16, walls shortened to 30 or 31 words), about 84,000 unit steps, no exception
+   (`tools/units_rsc.c`: direct simulation printing round starts; `tools/units_model.py`: the check). So the tape
+   at round starts is a plain counter: no tails move, and the cut points move only because walls grow.
 2. *Reaching that tape.* The second overflow is at step 1.4·10^15, far beyond step-by-step computation in Rocq. It
    needs the first chain as an accelerated counter (rounds skipped arithmetically), its end process up to the
    overflow, and the overflow itself (the cascade rule for the top walls, section 3). This is the larger part.
