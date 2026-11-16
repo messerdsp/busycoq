@@ -313,3 +313,20 @@ Proof.
   follow round_close.
   rewrite lpow_add. cbn [lpow]. simpl_tape. finish.
 Qed.
+
+(** Units of the post-overflow chain in cut form (README section 6): a unit is entered with the head in state D on
+    its first cell and [1;1] to the left, and left for the last time in state C on the cell left of it. *)
+Lemma enter_D m l r:
+  l <* [1;1] {{D}}> [0;1;1;1;0;1]^^(S (S m)) *> r -->*
+  l <* [0;0;0;0;0] {{D}}> [0;1;1;0;1;1;1] *> [0;1;0;1;1;1]^^m *> [0;1] *> r.
+Proof.
+  intros. rewrite (lpow_rotate' [0;1;1;1] [0;1]). cbn [lpow]. simpl_tape. es.
+Qed.
+
+(** A deep unit in phase D0 (digit (01)^7, wall n+3 words, followed by a wall of at least two words): one trip. *)
+Lemma trip_D0 n l r:
+  l <* [1;1] {{D}}> [0;1;1;1;0;1]^^(S (S (S n))) *> [0;1;0;1;0;1;0;1;0;1;0;1;0;1] *> [0;1;1;1;0;1;0;1;1;1;0;1] *> r -->*
+  l <* [0] {{C}}> [1;0;1;0] *> [1;1;1;0;1;0]^^n *> [1] *> [1;1;0;1;0;1;1;1;0;1;0;1;1;1;1;1;1;1;0;1;0;1;0;1;0;1;0;1;0;1;1;1;0;1;0;1;1;1;0;1] *> r.
+Proof.
+  intros. follow (enter_D (S n)). simpl_tape. follow unit_round_a. es.
+Qed.
