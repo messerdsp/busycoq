@@ -14,7 +14,8 @@ Everything below marked *(sim)* was checked by direct simulation; apart from the
   digit and absorb lemmas), the carry total on every word, and `holdout_nonhalt_of_no_bad`: if the list machine
   `stepL` started from `LL 5 5 [1;0]` never reaches `b = 0` with a word that starts with none of `101`, `11`, `00`,
   then `~ halts holdout c0`.
-* *Checked by simulation*: the real run (and the exact models of it) to phase 29,438 with no bad overflow, and the
+* *Checked by simulation*: the real run (and the exact models of it) to phase 29,900 with no bad overflow (the exact
+  full-tape run from phase 20,010 was stopped there on 2026-11-17; no excursion after 20,010), and the
   low end predicted to phase 4,000,000 (excursions at 1,402,241 and 2,413,709, none after it up to 4,000,000); at every
   excursion the run next to the bottom is long (hundreds or more after the first few hundred phases).
 * *Open*: the global statement. A bad overflow needs a short run (in the one tested pattern, `A` even, `B` odd, `C`
