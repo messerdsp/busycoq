@@ -8,7 +8,8 @@ nested base-4 counter with overflows, and follows it exactly to 10^18 steps with
 **Status: open.** Not proved non-halting yet. Proved in Rocq: the block rules, the round of the post-overflow chain
 for any unit list (section 4, `rocq/round/`), and that the machine reaches the tape after the second overflow
 (`PART3.md`). The rest is checked by simulation (*sim*). Exact simulation shows that the end of the new chain uses up
-the band slowly (section 3), so the planned closure argument does not give non-halting (section 6).
+the band slowly (section 3), so the planned closure argument does not give non-halting (section 6); the overflows
+that follow are simulated in section 3b.
 
 | state | read 0 | read 1 |
 |---|---|---|
@@ -33,7 +34,9 @@ the band slowly (section 3), so the planned closure argument does not give non-h
   the block rules proved in Rocq (`rocq/M130Rules.v`).
 * *Open*: a rule for what an overflow does to the tape in general, and an invariant that survives it. The end of the
   new chain cycles but eats 4 band words per cycle (section 3), so the next overflow does come, after about 282,000
-  cycles.
+  cycles. Simulated (section 3b): that overflow and about 40 later ones rewrite the first frozen unit by one rule
+  (band + 8V/9, wall V/3), until the cascade is used up. The overflow that would build the next cascade (type 2) is
+  not simulated yet. No halt seen.
 
 ## 1. The counter (*sim*, steps 2·10^8 to 3·10^9)
 
@@ -163,6 +166,79 @@ band and the walls multiplied by 1 or 4 independently (`B, W` = 70,403, 6,611 ->
 -> 41,131 and 8,804, 2,159, 538), and the wall moved by -3 to +3. So the frozen cascade behaves like the next digits of a nested
 counter: each overflow of the level below carries into it by a fixed rule. In the real run the new chain started
 differently (its own leftover words differ) and has not overflowed by 10^18 steps.
+
+## 3b. The overflows after the second (*sim*)
+
+Everything in this section is simulation, with `tools/ovr.c` (chainb's core: logs round starts, long trips, and
+stops when the first frozen wall changes) and the scripts in `tools/overflow/`. Nothing here is proved.
+
+**Method: drop the regular units.** The end region is visited only when every regular unit carries, and it only
+sees the trip interface (section 4, `Trip`; proved for the six known unit types, checked by simulation for the others).
+So removing regular units changes only *when* the end is visited, not *what* happens there. That turns 4^n rounds
+per end visit into a few rounds:
+* `mkmin.py`, `reset2.py`: keep the prefix and unit 1 (wall set to 40 words, phase changed only for 6-cell
+  alignment), drop every other segment that is a regular unit, and keep everything else. A segment is a wall of ≥ 3
+  words plus the rest up to the next such wall. It counts as a regular unit when `gunit2.py` finds that 4 trips in
+  the unit interface bring it back to itself with exactly one carry and the wall 2 words longer. This test also
+  accepts unit types not in section 4, and new ones appear after every overflow. Static segments that every trip
+  passes unchanged are kept. Walls of kept segments over 200 words are shortened, keeping the residue mod 12.
+* The band in front of the first frozen unit is shortened to a few dozen words, keeping its length mod 48 (the pass
+  over the band does not depend on its length). The frozen cascade is kept exactly.
+* `loop3.sh`/`auto.sh` alternate runs of 2 million rounds with resets and stop when the first frozen wall changes.
+
+Cross-check: README's scaled run (walls ÷256, plain chainb, no dropping) and this method give the same rule below.
+
+**Type 3: the end rewrites the first frozen unit.** At step 2,592,545,302,250,949 the tape is: the active chain
+and its end, then frozen units `F1, F2, ...`; each is a band of `b` blocks and a chain of walls `V, ~V/4, ~V/16, ...`
+(`F1`: 1,128,303 band words, `V` = 1,692,491; `F2`: 282,063, 423,113; `F3`: 70,506, 105,774; `F4`: 22,011, 33,026;
+then smaller pieces and the old end). The end eats the band in front of `F1` (section 3: 4 words per 72 visits;
+after the next overflow the end cycles again, with period 1,032 visits and 36 band words per period, and different
+unit types). Soon after the band is gone (sometimes with a few band words still left), one long trip
+(3·10^13 steps for `V` = 1.7·10^6) rewrites `F1` and nothing else:
+
+    F1 = (band b, chain V, V/4, V/16, ...)   ->   (band b + 8V/9 blocks, chain V/3, V/12, V/48, ...)
+
+The frozen walls (`V` just before each overflow, then `V` after it; `+k`: band words left over from before):
+
+| frozen unit | walls, one overflow after another |
+|---|---|
+| F1 | 1,692,490 → 564,162 → 188,045 → 62,681 → 20,888 → 6,959 (+23) → 2,313 → 772 (+30) → 250 → 81 (+17) → 21 |
+| F2 | 423,114 → 141,040 (+32) → 47,014 → 15,661 → 5,223 → 1,735 → 579 (+25) → 186 → 60 → 13 |
+| F3 | 105,774 → 35,250 → 11,749 → 3,912 → 1,299 → 427 → 139 → 41 → 8 |
+| F4 | 33,026 → 10,996 → 3,660 (+42), then the rest of the cascade goes at once |
+
+New band (blocks) against `8V/9`: 1,504,432 / 1,504,436; 501,468 / 501,473; 167,144 / 167,151; 55,712 / 55,716;
+376,108 / 376,101 (`F2`); 94,016 / 94,021 (`F3`); 29,348 / 29,356 (`F4`). The new wall against `V/3`: 564,162 /
+564,163; 188,045 / 188,052; 141,040 / 141,038; 35,250 / 35,258; 10,996 / 11,009. So the rule holds within about
+10 blocks for `V` from 1.7·10^6 down to about 1,000, on four different frozen units. Below about 150 words it
+drifts (60 → 13 instead of 20). When `F_k`'s wall is down to about 20 words, the next overflow takes the rest of
+`F_k` and the end goes on to `F_{k+1}`. The mass is conserved: a chain `V, V/4, ...` is 4V/3 blocks, and
+`8V/9 + 4(V/3)/3 = 4V/3`. In about 40 simulated overflows of this kind no halt occurred (`ovr` stops on the
+halting transition). Data: `data/overflows_sim.txt`.
+
+**After the cascade.** When all frozen units are used up, the end lies against the blank tape behind the leftover
+end word of the old chain (`... 70 [28] 3 [53]` at step 2.59·10^15). There it starts a new counter: units with
+walls in ratio 4 are born in front of a fixed right end. That is the situation of the first chain between the
+first and the second overflow (section 3: units born just left of the fixed end word `T`). There, the next event
+was the second overflow (type 2), which turned the whole active chain into the cascade: top wall `W1` into a band
+of about `2W1/3` blocks, then each wall `W_k` into a band of `2W_k/3` blocks followed by a near copy of the chain
+from `W_{k+1}` on (section 3). **Not simulated yet**: dropping regular units destroys the active chain that a type-2
+overflow turns into the next cascade. A faithful test needs the active chain rebuilt (the dropped units in birth
+order with realistic walls) before the type-2 overflow.
+
+**The first overflow** (step 193,820,039) is a small event of a third kind: the walls 2,517, 617, 147 are untouched
+and only the end `34 [10] 5 [10]` becomes `3 [17] 15 [33]`. It is like the end rewrite at step 2.63·10^14
+(section 3), not a cascade.
+
+**Candidate rule (not verified).** At the start of an epoch the tape is a fresh chain, its end, a cascade
+`F1, ..., Fn` with `F_k = (band ~2W_k/3, chain W_{k+1}, W_{k+2}, ...)` made from the previous chain's walls
+`W_1, W_2, ...`, and a leftover end word. During the epoch type-3 overflows use up the cascade one frozen unit at a
+time, wall `V -> V/3` per overflow, about log_3 V overflows per unit. Then the end reaches the blank tape and, as
+after the first overflow, the chain grows in front of a fixed end until a type-2 overflow turns it into the next
+cascade, with much larger walls. If the type-2 step repeats, every overflow maps the tape to the same shapes with
+larger numbers. The type-3 step is checked across scales (table). The type-2 step is seen once (the second
+overflow, and its scaled restarts in section 3) and has not been seen to repeat. The small-wall end of each frozen
+unit (below ~150 words) does not follow the formula exactly.
 
 ## 4. Rocq
 
@@ -331,9 +407,13 @@ zcat ../data/pre_overflow_1368863728438429.txt.gz > pre.txt && python3 mkinit.py
 ./ovtrips.sh v256.txt 1e15 t256.txt                                                       # scaled-down overflow
 gcc -O2 -o p3_count p3_count.c && DUMP=init26.txt ./p3_count 1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF 2592545302250949
 python3 end_period.py init26.txt 30 150 150                                             # the end period (minutes)
+cd overflow && gcc -O2 -o ovr ../ovr.c                                                    # section 3b
+python3 mkmin.py ../init26.txt min15.txt 15 1 40                                          # unit 1 only, band 15 words
+TRIPMIN=1e18 MARKER=1692491 MAXR=1e10 DUMP=ov3_ ./ovr min15.txt > ov3.log                             # to overflow 3 (minutes)
+./auto.sh ov3_00.txt A 40 > auto.log                                                      # the overflows after it (hours)
 ```
 
-Rocq (after `make` in `verify/`):
+Rocq (Coq 8.20.1; after `make` in `verify/`):
 
 ```bash
 cd notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/rocq && coqc $(cat _CoqProject) M130Rules.v
