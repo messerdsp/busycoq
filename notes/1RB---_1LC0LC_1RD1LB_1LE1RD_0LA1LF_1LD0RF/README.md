@@ -413,7 +413,9 @@ TRIPMIN=1e18 MARKER=1692491 MAXR=1e10 DUMP=ov3_ ./ovr min15.txt > ov3.log       
 ./auto.sh ov3_00.txt A 40 > auto.log                                                      # the overflows after it (hours)
 ```
 
-Rocq (Coq 8.20.1; after `make` in `verify/`):
+Rocq (Coq 8.20.1; after `make` in `verify/`). All files compile with 8.20.1 (checked Nov 2026): `M130Rules.v` 46 s,
+`units/Units.v` 90 s, `round/Trips.v` 7 min, `round/Round.v` 3 s, `p3/` with `P3Reach.v` 18 min, the 54 files in
+`end/` 46 min on 4 cores, no failures.
 
 ```bash
 cd notes/1RB---_1LC0LC_1RD1LB_1LE1RD_0LA1LF_1LD0RF/rocq && coqc $(cat _CoqProject) M130Rules.v
