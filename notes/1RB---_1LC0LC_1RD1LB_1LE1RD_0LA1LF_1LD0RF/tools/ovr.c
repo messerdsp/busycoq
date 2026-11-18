@@ -34,6 +34,8 @@ static void push(Stack *s, int b, uint64_t n) {
 static int pop1(Stack *s) { if (!s->len) return 0; int b = s->r[s->len - 1].b; if (--s->r[s->len - 1].n == 0) s->len--; return b; }
 static void pr128(FILE *f, u128 x) { char buf[48]; int i = 47; buf[i] = 0; if (!x) buf[--i] = '0'; while (x) { buf[--i] = '0' + x % 10; x /= 10; } fputs(buf + i, f); }
 static void prb(FILE *f, int b) { for (int k = 0; k < K; k++) fputc('0' + (b >> k & 1), f); }
+// ovr: (env PROG=n: print the head position every n macro steps; DUMPANY=1: dump at any round start, not only
+// when the standard prefix is block-aligned)
 // ovr: run from a tape line (INIT format of chainb: "steps state back runs...", head left of it in state C moving left)
 // and log round starts: env TRIPMIN (log rounds whose trip took more than this many steps and 30 times the
 // previous trip, default 1e7),
@@ -92,7 +94,15 @@ int main(int argc, char **argv) {
         for (long i = nt - 1; i >= 0; i--) push(&R, tmp[i].b, tmp[i].n);
     }
     u128 last = steps; double rounds = 0, prevtrip = 1e18; int away = 1, pend = 0;
+    long long it = 0; long long PROG = getenv("PROG") ? atoll(getenv("PROG")) : 0;
     for (;;) {
+        if (PROG && ++it % PROG == 0) {
+            printf("PROG "); pr128(stdout, steps); printf(" state %c dir %d Lruns %ld Rruns %ld | L(near head): ", 'A'+s, dr, L.len, R.len);
+            for (long q = L.len - 1; q >= 0 && q >= L.len - 12; q--) printf("%llu ", (unsigned long long)L.r[q].n);
+            printf("| R(near head): ");
+            for (long q = R.len - 1; q >= 0 && q >= R.len - 12; q--) printf("%llu ", (unsigned long long)R.r[q].n);
+            printf("\n"); fflush(stdout);
+        }
         Stack *F = dr ? &R : &L, *Bk = dr ? &L : &R;
         int fac = F->len ? (int)F->r[F->len - 1].b : 0;
         MT *x = macro(s, dr, back, fac);
@@ -128,7 +138,7 @@ int main(int argc, char **argv) {
                 }
                 // dumps are written at the next round start where the prefix 0 11111111 0111 01 starts at a block
                 // boundary (head in C on the blank cell left of the back block 111111, next block 110111)
-                if (pend && s == 2 && back == 63 && R.len && R.r[R.len - 1].b == (uint32_t)tok2b("110111")) {
+                if (pend && (getenv("DUMPANY") || (s == 2 && back == 63 && R.len && R.r[R.len - 1].b == (uint32_t)tok2b("110111")))) {
                     char fn[512];
                     if (pend == 3) { printf("END %.0f ", rounds); pr128(stdout, steps); printf(" "); skel(stdout, &R, back, NR); printf("\n"); if (DP) { snprintf(fn, sizeof fn, "%send.txt", DP); dump(fn, steps, s, back, &R); } return 0; }
                     if (DP) { snprintf(fn, sizeof fn, "%s%02d.txt", DP, ndump++); dump(fn, steps, s, back, &R); printf("DUMP %s at round %.0f\n", fn, rounds); }

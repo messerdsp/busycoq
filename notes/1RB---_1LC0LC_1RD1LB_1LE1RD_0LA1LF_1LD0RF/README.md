@@ -222,10 +222,25 @@ walls in ratio 4 are born in front of a fixed right end. That is the situation o
 first and the second overflow (section 3: units born just left of the fixed end word `T`). There, the next event
 was the second overflow (type 2), which turned the whole active chain into the cascade: top wall `W1` into a band
 of about `2W1/3` blocks, then each wall `W_k` into a band of `2W_k/3` blocks followed by a near copy of the chain
-from `W_{k+1}` on (section 3). **Not simulated yet**: dropping regular units destroys the active chain that a type-2
-overflow turns into the next cascade. A faithful test needs the active chain rebuilt (the dropped units in birth
-order with realistic walls) before the type-2 overflow.
+from `W_{k+1}` on (section 3).
 
+**The next type-2 overflow** (*sim*; `reset4.py`, `loop5.sh`, `construct.py`). Dropping units after the cascade is
+used up (`reset4.py`), the end region reaches the next type-2 overflow after a few hundred rounds. Since the type-2
+overflow processes the whole chain, the test was repeated with a realistic chain (`construct.py`): init26's units
+U1..U4, K, D, K, D with init26's walls (1,880,776, 470,195, ..., 106; ratio 4), all in the carrying phase, in front
+of the end region taken just before the event, plus the two static pieces left over from earlier overflows. The
+overflow comes at the first end visit and takes two trips (5.9·10^13 and 2.1·10^13 steps). No halt.
+* First trip: every wall of the chain becomes 3/4 of itself (1,880,776 -> 1,410,582 exactly), and copies of the
+  lower walls are written to its right, *without bands*: `470177 117544 29380 ... 5494 1373 341 80 19 4 ... 1703
+  427 100 25 ...`.
+* Second trip: the shrunken top wall becomes a band of 1,253,863 blocks (`2W1/3` = 1,253,851), followed by a near
+  copy of the chain from its second wall on (470,191, 117,518, 29,379, 7,345, 1,836, 445, 106, 24, 6).
+
+Against the second overflow: the 3/4 shrink, the top band `2W1/3` and the copy from `W2` agree. The lower part of
+the cascade does not: after the second overflow each lower copy came with its own band (`2W_k/3`), here there are
+none. So the cascade a type-2 overflow builds depends on the end region at that moment, and the next epoch does
+not start from the same shapes. Caveat: the chain here has init26's unit types and walls, not the very long chain
+of later unit types the real run would have by then.
 **The first overflow** (step 193,820,039) is a small event of a third kind: the walls 2,517, 617, 147 are untouched
 and only the end `34 [10] 5 [10]` becomes `3 [17] 15 [33]`. It is like the end rewrite at step 2.63·10^14
 (section 3), not a cascade.
@@ -235,9 +250,9 @@ and only the end `34 [10] 5 [10]` becomes `3 [17] 15 [33]`. It is like the end r
 `W_1, W_2, ...`, and a leftover end word. During the epoch type-3 overflows use up the cascade one frozen unit at a
 time, wall `V -> V/3` per overflow, about log_3 V overflows per unit. Then the end reaches the blank tape and, as
 after the first overflow, the chain grows in front of a fixed end until a type-2 overflow turns it into the next
-cascade, with much larger walls. If the type-2 step repeats, every overflow maps the tape to the same shapes with
-larger numbers. The type-3 step is checked across scales (table). The type-2 step is seen once (the second
-overflow, and its scaled restarts in section 3) and has not been seen to repeat. The small-wall end of each frozen
+cascade, with much larger walls. The type-3 step is checked across scales (table). The type-2 step has been seen twice (the second overflow; the
+simulated next one above): both build a band of `2W1/3` and a copy of the chain, but the lower part of the cascade
+differs, so it is not yet one rule with the same shapes each time. The small-wall end of each frozen
 unit (below ~150 words) does not follow the formula exactly.
 
 ## 4. Rocq
