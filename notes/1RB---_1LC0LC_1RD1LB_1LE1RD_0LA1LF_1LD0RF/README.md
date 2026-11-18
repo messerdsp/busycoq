@@ -241,6 +241,17 @@ the cascade does not: after the second overflow each lower copy came with its ow
 none. So the cascade a type-2 overflow builds depends on the end region at that moment, and the next epoch does
 not start from the same shapes. Caveat: the chain here has init26's unit types and walls, not the very long chain
 of later unit types the real run would have by then.
+**The type-3 rule is exact up to a period of 36** (*sim*; `var1.sh`, `varan.py`, start tape
+`data/before_overflow_V3914.txt.gz`: band used up, first frozen unit 3,914, 972, 234, 55, 8). Changing only the
+first frozen wall to every V from 3,896 to 4,039 and running each to its overflow (144 runs):
+* the rewritten unit (new band plus its new chain) is always exactly `6V + 100` cells;
+* the new top wall grows by 3 and the band by a fixed amount when V grows by 36, for every V (exactly period 36; no
+  smaller period works); within a period the band/wall split jitters by about one word;
+* the new wall moves by about 1 per 12 added to V, so the rule reads `new wall ~ V/12 + next wall` (3,914/12 + 972 ~
+  1,298; 972/12 + 234 ~ 315, the second new wall), which gives `V/3` when the next wall is `V/4`.
+So within this test the overflow is a linear map plus a correction that depends only on V mod 36: the kind of rule
+a proof can state. Not yet tested: the dependence on the lower walls and on the state of the end region.
+
 **The first overflow** (step 193,820,039) is a small event of a third kind: the walls 2,517, 617, 147 are untouched
 and only the end `34 [10] 5 [10]` becomes `3 [17] 15 [33]`. It is like the end rewrite at step 2.63·10^14
 (section 3), not a cascade.
