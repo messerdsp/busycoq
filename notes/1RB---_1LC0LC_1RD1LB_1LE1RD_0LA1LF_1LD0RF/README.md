@@ -252,6 +252,17 @@ first frozen wall to every V from 3,896 to 4,039 and running each to its overflo
 So within this test the overflow is a linear map plus a correction that depends only on V mod 36: the kind of rule
 a proof can state. Not yet tested: the dependence on the lower walls and on the state of the end region.
 
+**Does the variety stay finite? No, as far as tested** (*sim*; `utypes.py`, `ends.py`, over the ~90 tapes saved
+in the runs above, in step order).
+* Unit types (a type = the 4 bodies a regular unit cycles through): 20 at the start, then 1 to 4 new ones after
+  nearly every overflow, 65 in all, with no sign of stopping. The new tails are made of a few recurring pieces
+  (`011101`, `01`, `0111111111`, `0101111111`, `011111111101111111`, ...) in ever new orders and lengths (up to
+  2,466 cells), not one fixed word with a varying count.
+* The end region just after each overflow (walls of 20 words or more written as one symbol): 22 real overflows, 22
+  different end regions (78 to 792 cells).
+So the history is recorded in ever longer unit tails and end words. A proof would need a description of these
+words themselves (they look like nested copies of the same structure), not a finite list of cases.
+
 **The first overflow** (step 193,820,039) is a small event of a third kind: the walls 2,517, 617, 147 are untouched
 and only the end `34 [10] 5 [10]` becomes `3 [17] 15 [33]`. It is like the end rewrite at step 2.63·10^14
 (section 3), not a cascade.
