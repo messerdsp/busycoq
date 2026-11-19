@@ -28,17 +28,17 @@ def note_signs(r):
     sg = {}
     if a.get('status') == 'cryptid' or s.get('status') == 'CRYPTID' or 'cryptid' in (w.get('desc', '') + w.get('name', '')).lower():
         sg['cryptid'] = 'labelled a (potential) cryptid'
-    if a.get('status') == 'lottery' or re.search(r'pseudo-?random|random walk|lottery|look(s)? random|random-looking|like random|look(s)? irregular|irregular lengths', tl):
+    if a.get('status') == 'lottery' or re.search(r'pseudo-?random|random walk|lottery|look(s)? random|random-looking|like random|look(s)? irregular|irregular lengths|irregular hierarchy|never repeats|chaotic wall|lengths look irregular', tl):
         sg['lottery'] = 'notes: random-looking statistics decide halting'
-    if re.search(r'collatz|\b\d/\d map|\b3x ?/ ?2|3n/2|x ?→ ?3x', tl):
+    if re.search(r'collatz|\b\d/\d map|\b3x ?/ ?2|3n/2|x ?→ ?3x|factors? near 1\.\d|by about 3/2|grows? \d/\d per', tl):
         sg['collatz'] = 'notes: Collatz-like map'
     if 'spaghetti' in cls or re.search(r'chaotic (bell|fractal|1dca|ack)', cls) or 'no structure' in tl:
         sg['nostruct'] = 'notes/class: chaotic, no usable structure'
     prose = ' '.join([a.get('note', ''), (r.get('explorer') or {}).get('summary', ''), (r.get('explorer') or {}).get('verdict', ''),
                       s.get('notes', '')]).lower()
-    if re.search(r'(?<!shift-)overflow', prose): sg['overflow'] = 'notes: overflows'
+    if re.search(r'(?<!shift-)overflow|collapse|rebuil|right-end events|events do not stop', prose): sg['overflow'] = 'notes: overflows/collapses'
     if re.search(r'drift|used up|slowly|eats ', tl): sg['drift'] = 'notes: slow drift'
-    if re.search(r'\brare\b|exception', tl): sg['rare'] = 'notes: rare events/exceptions'
+    if re.search(r'\brare\b|exception|can in principle leave a halting|halting words? exist', tl): sg['rare'] = 'notes: rare events/exceptions'
     if re.search(r'two counters|bi-counter|registers|independent|several (counters|parts)|two-stack|nested', tl): sg['parts'] = 'notes: several interacting parts'
     pos = {}
     if a.get('status') == 'rules' or re.search(r'proved in (rocq|lean)|in lean \(kernel\)|rules? (are )?proved', tl) or e_kernel(r) >= 3:

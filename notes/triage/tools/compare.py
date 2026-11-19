@@ -71,9 +71,9 @@ for m, a in an.items():
     ss = a.get('signs', {})
     nt = t
     drift = 'drift' in ss or bool(re.search(r'drift|used up|slowly|eats ', nt))
-    over = 'overflow' in ss or bool(re.search(r'(?<!shift-)overflow', ' '.join([(r.get('ai') or {}).get('note', ''),
+    over = 'overflow' in ss or bool(re.search(r'(?<!shift-)overflow|collapse|rebuil|right-end events|events do not stop', ' '.join([(r.get('ai') or {}).get('note', ''),
              (r.get('explorer') or {}).get('summary', ''), (r.get('explorer') or {}).get('verdict', '')]).lower()))
-    lot = 'lottery' in ss or (r.get('ai') or {}).get('status') == 'lottery' or bool(re.search(r'pseudo-?random|random walk|lottery', nt))
+    lot = 'lottery' in ss or (r.get('ai') or {}).get('status') == 'lottery' or bool(re.search(r'pseudo-?random|random walk|lottery|irregular|never repeats', nt))
     out = {'like13': bool(like13), 'like9': bool(like9), 'evidence': {**info, 'notes13': n13, 'notes9': n9}}
     bonus = 0; why = []
     if like13:
