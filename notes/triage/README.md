@@ -22,8 +22,9 @@ Short answer:
     Collatz-like risk), 40361 (a race decided about 10^12 rounds out, already reduced in Lean and actively worked
     on elsewhere), 5380 (+173888) and 78071 (+111043) (tens of thousands of irregular domains: no compact
     structure at large scale), 149064 (binary counter of many parts, not decoded).
-* New simulation result: **19219 does not halt up to at least 3.7·10^19 steps.** The explorer's run stopped at
-  1.0·10^19. The overflow near 3.3·10^19 used up two far blocks (644 and 494 words) without halting (section 19219).
+* New simulation result: **19219 does not halt in its first 4.8·10^20 steps** (20 min of `tri.c`, exact). The
+  explorer's run stopped at 1.0·10^19. The overflow near 3.3·10^19 used up two far blocks (644 and 494 words)
+  without halting (top 10, rank 8; `deep/19219.long.txt`).
 * **Likely to halt** (from notes, not from this simulation): the probviously-halting cryptids (Lucy's Moonlight
   166535, 8084, 103424) and the Reus vampire family (82614, 121010, 134470, 92948; five of its members were
   simulated to a halt by Ahmer Raza in October). None is cheap: each halts, if at all, far beyond direct simulation.
@@ -37,7 +38,7 @@ Files:
 | `STAGE1.md`, `STAGE2.md` | what each stage collected |
 | `data/sources.json` | per machine: open PRs, spreadsheet, busy-beaver-explorer ledger, AI artifact, wiki label, related tables |
 | `data/fastpass.jsonl`, `data/analysis.json`, `data/compare.json`, `data/scores.json` | fast pass, signs, comparison, scores |
-| `deep/` | deep-dive outputs: `*.deep.txt` (long run and shape test), `*.far.txt` (far-end drift test), `112769.phases.txt` |
+| `deep/` | deep-dive outputs: `*.deep.txt` (long run and shape test), `*.far.txt` (far-end drift test), `112769.phases.txt`, `65980.shapes.txt`, `19219.long.txt` |
 | `tools/` | `tri.c` (simulator), `exact_check.sh`, `fastpass.py`, `analyze.py`, `compare.py`, `score.py`, `table.py`, `deep.py`, `deep2.py`, `phases112769.py`, `canon.py`, `build_sources.py` |
 
 ## Method
@@ -150,9 +151,9 @@ frozen between rare events and changed by them, or worn down slowly.
 | 5 (74) | 5380 `1RB1LD_1LC---_1RE0LD_1LC1LD_1RF0RE_1RA0RC` (+173888) | domains of `01`/`10` phases cut by short walls; about 63,000 runs at 6.5·10^7 cells, wall lengths irregular | fails (28,669 shapes in 30,060 returns) | none (structural counter + chaotic edge) | an invariant over a column model; the AI artifact reports about 200 rule lemmas in Rocq and an invariant needing "hundreds to thousands of cases" | hard; the large-scale tape has no compact description in this simulation (close to "no structure") |
 | 6 (74) | 78071 `1RB1LC_1RC---_1LD1LC_1RE0LC_1RF0RE_1RA0RD` (+111043) | same family as 5380: domains that halve near the left end (735,146, 367,573, 183,790, 91,890: a binary counter), irregular further right | fails | none; the irregular "chaotic edge" is a lottery risk | as 5380 | hard |
 | 7 (74) | 149064 `1RB0LD_0RC1RA_1RD1RF_1LA0LE_0RA0LC_0RA---` | binary counter on a periodic background, about 160 runs, 238 shapes; block sizes grow roughly geometrically (×1.5 to ×1.8) | not periodic at the scale reached | none clear (several parts) | decode the counter at the left end (only described from observation); explorer proves the sweeps and the right-end turn in Lean | medium-hard; little prior work (104-line notes, 8 Nov) |
-| 8 (73) | 19219 `1RB1LD_1RC1RE_1LA0RA_1RC0LB_0LA1RF_---1RD` (+44531 same table, 157488 same run) | very clean: 17 runs. Two big runs trade (one counts down, the other grows), followed by frozen far blocks | fails at overflows only: between overflows the far blocks are identical at every return; at each overflow (≈9.5·10^14, 2.2·10^16, 3.3·10^17, 3.5·10^18, 3.3·10^19) they wear down (1,047 → 916; 10,101 → 9,576; 3,392 → 644 → used up) | #9-like timer **and** 13-like band; **13's hard part present**: the far band is used up at growing scales. New: the overflow near 3.3·10^19 used up the 644- and 494-word blocks without halting and froze a new 1.28·10^9 block | the overflow map on the far blocks in closed form (as 13 needs), and what happens when each far block runs out; 9 rules (ticks and two overflows) are in Lean in busy-beaver-explorer, and its map reproduces the run to 10^19 | hard but tractable, and the closest match to 13's existing tools; 3 holdouts for one proof |
+| 8 (73) | 19219 `1RB1LD_1RC1RE_1LA0RA_1RC0LB_0LA1RF_---1RD` (+44531 same table, 157488 same run) | very clean: 17 runs. Two big runs trade (one counts down, the other grows), followed by frozen far blocks | fails at overflows only: between overflows the far blocks are identical at every return; at each overflow (≈9.5·10^14, 2.2·10^16, 3.3·10^17, 3.5·10^18, 3.3·10^19) they wear down (1,047 → 916; 10,101 → 9,576; 3,392 → 644 → used up) | #9-like timer **and** 13-like band; **13's hard part present**: the far band is used up at growing scales. New: the overflow near 3.3·10^19 used up the 644- and 494-word blocks without halting and froze a new 1.28·10^9 block; no halt to 4.8·10^20, where the far blocks are 886, 9,456, 607,084 | the overflow map on the far blocks in closed form (as 13 needs), and what happens when each far block runs out; 9 rules (ticks and two overflows) are in Lean in busy-beaver-explorer, and its map reproduces the run to 10^19 | hard but tractable, and the closest match to 13's existing tools; 3 holdouts for one proof |
 | 9 (73) | 23154 `1RB0LE_1RC0LD_1RD1RA_1RE0RB_0LA0RF_1LE---` (+115779) | 13-like: a fixed prefix, a band of about 129,000 words, a short binary-digit word, one huge growing run (1.09·10^9 at 1.9·10^19) | fails slowly: the band loses a few words per nested event (129,002 at 3.3·10^13, 128,995 at 3.7·10^17, 128,992 at 1.9·10^19); the 10 runs at the far end never changed after 5.3·10^11 | 13-like; **band drift present**, but much slower than 13's (a few words per event at growing scales) | the nested-run rule in closed form; the band then only matters after about 10^5 nested events, so a proof can treat it as a parameter that decreases by a known amount per event. Explorer: every ordinary sweep proved in Lean, 258,046 proved sweeps | medium-hard; the slow band may make it easier than 13 |
-| 10 (73) | 65980 `1RB1LC_1LA1RF_0RD1RD_0RA0LE_1LA0LE_0RC---` | very clean: 13 runs, 7 shapes in 30,036 returns. Within a phase a + b is constant (b counts down), and a third register grows | fails between phases (registers rebuilt); the phase map was not extracted in the time | #9-like (timer); **lottery not seen** | the phase-to-phase map of the three registers, then an invariant; the AI artifact reports exact sweep laws in Rocq; explorer has only shift rules (68-line notes, 8 Nov) | **medium; the best candidate here for a quick proof attempt**: few shapes means few rules, and nobody seems to be on it |
+| 10 (73) | 65980 `1RB1LC_1LA1RF_0RD1RD_0RA0LE_1LA0LE_0RC---` | very clean: 13 runs, 7 shapes in 30,036 returns. Within a phase a + b is constant (b counts down), and a third register grows | fails between phases (registers rebuilt). The phase map was not extracted in the time; the tape at shape changes (`deep/65980.shapes.txt`) shows two marker forms (`100011` and `101100 011110`) alternating as the count passes between two blocks, and at larger events a nested copy of the register pattern (e.g. at 4.4·10^17) | #9-like (timer); **lottery not seen** | the phase-to-phase map of the three registers, then an invariant; the AI artifact reports exact sweep laws in Rocq; explorer has only shift rules (68-line notes, 8 Nov) | **medium; the best candidate here for a proof attempt**: few shapes means few rules, and nobody seems to be on it; the nested levels mean it is a recursive counter, not a flat one |
 
 Next in line (score 69 to 73): 175626, 139516, 145825 (odd n → (3n+7)/2: Collatz-like), 34042, 60438 (with 9123, same
 table, score 51; "terminal regime proved, does the run reach it?"; explorer: right-end events can leave halting words),
@@ -163,7 +164,8 @@ table, score 51; "terminal regime proved, does the run reach it?"; explorer: rig
 * **65980**: clean timer structure, few shapes, little written about it.
 * **20489** (+ three other starts of its table: 9074, 44966, 98843): the AI artifact reports an exact odometer
   proved in Rocq for all sizes. A halt needs about 4 parity walls at once; runs show at most 2. The missing piece
-  is a bound on parity walls. Its score (≈ 60) is pulled down by the overflow and parts signs.
+  is a bound on parity walls. Its score (61) is pulled down by an overflow sign in the notes and a tape that did not
+  compress in the fast pass (no +8).
 * **60438 / 9123** (one table): a terminal regime is proved never to halt. The question is whether the run from
   blank reaches it. busy-beaver-explorer ran 9123 to wall visit about 10^25600 with no halt, and the right-end
   events there have not stopped, so this is probably not quick.
@@ -188,7 +190,8 @@ Flags come from `tools/compare.py` (simulation and notes); the deep dives above 
 
 ## Likely to halt
 
-No machine halted in this simulation (fast pass: 10^10 to 10^17 steps per machine; deep runs: up to 3.7·10^19).
+No machine halted in this simulation (fast pass: 10^10 to 10^17 steps per machine; deep runs: 10^15 to 2·10^19, and
+4.8·10^20 for 19219).
 From the notes:
 
 * probviously halting cryptids: 166535 (Lucy's Moonlight), 8084 ("potentially probviously halting, exponential
