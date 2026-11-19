@@ -1,0 +1,6 @@
+K=6 result=RUN steps=3825122149948838303 cells=2478434004 runs=17 macro=12512833535 chain=4965156823 secs=120.00 recL=413072319 recR=5
+dominant return points (late half): [(('L', 'B'), 16248), (('L', 'D'), 44)]
+records at L-end state B: 30065, distinct shapes 1, most common shape covers 30065
+shape sequence period (last 2000 records): 1
+per-period increments constant at every phase: False
+examples (phase: most common increment vectors): {0: [((1, 0, 1, -1, 0, 0, 0), 1934), ((948151, 0, 948151, -948151, 0, 0, 0), 1), ((973132, 0, 973132, -973132, 0, 0, 0), 1)]}

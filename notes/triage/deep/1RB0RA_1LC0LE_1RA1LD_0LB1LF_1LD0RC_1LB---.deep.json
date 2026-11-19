@@ -1,0 +1,53 @@
+{
+ "machine": "1RB0RA_1LC0LE_1RA1LD_0LB1LF_1LD0RC_1LB---",
+ "K": 6,
+ "run": "K=6 result=RUN steps=3825122149948838303 cells=2478434004 runs=17 macro=12512833535 chain=4965156823 secs=120.00 recL=413072319 recR=5",
+ "dominant": [
+  "L",
+  "B"
+ ],
+ "records": 30065,
+ "shapes": 1,
+ "period": 1,
+ "increments_constant": false,
+ "increments_examples": {
+  "0": [
+   [
+    [
+     1,
+     0,
+     1,
+     -1,
+     0,
+     0,
+     0
+    ],
+    1934
+   ],
+   [
+    [
+     948151,
+     0,
+     948151,
+     -948151,
+     0,
+     0,
+     0
+    ],
+    1
+   ],
+   [
+    [
+     973132,
+     0,
+     973132,
+     -973132,
+     0,
+     0,
+     0
+    ],
+    1
+   ]
+  ]
+ }
+}
