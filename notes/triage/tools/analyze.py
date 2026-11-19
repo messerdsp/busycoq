@@ -83,7 +83,7 @@ def analyze(rec):
              bigruns=S[-1][5])
     sg = r['signs']
     # shape (not a sign, a description)
-    M['shape'] = ('fixed' if alpha < 0.05 and cells[-1] < 2 * cells[0] else 'log' if alpha < 0.2 else
+    M['shape'] = ('fixed' if cells[-1] <= cells[0] * 1.05 else 'log' if alpha < 0.2 else
                   'sqrt' if alpha < 0.62 else 'linear' if alpha > 0.85 else 'power')
     if rho > 0.5 and beta > 0.6:
         sg['nostruct'] = 'rho=%.2f, runs ~ cells^%.2f' % (rho, beta)
@@ -146,7 +146,7 @@ def analyze(rec):
             fin = {b for b, c in tape_runs(F.split(None, 3)[3]) if b and c >= 3}
             new = fin - early
             M['late_new_types'] = len(new); M['big_types_end'] = len(fin)
-            if new and len(new) >= max(1, 0.25 * len(fin)):
+            if len(new) >= 2 and len(new) >= 0.25 * len(fin):
                 sg['late'] = '%d of %d block types in big runs at the end were not in big runs before 30%% of the run' % (len(new), len(fin))
     # parts: large runs whose size ratios still change
     if F:
@@ -155,17 +155,23 @@ def analyze(rec):
         big = sorted([c for c in fr if c >= 10 and c >= 0.05 * mx], reverse=True)
         M['large_runs_end'] = len(big)
         if len(big) >= 3 and E:
-            # same at the middle E record
-            mid = E[len(E) * 2 // 3]
-            fr2 = [c for b, c in tape_runs(mid['tape']) if b]
-            mx2 = max(fr2) if fr2 else 0
-            big2 = sorted([c for c in fr2 if c >= 10 and c >= 0.05 * mx2], reverse=True)
-            if len(big2) >= 3:
-                r1 = [big[i] / big[i + 1] for i in range(2)]; r2 = [big2[i] / big2[i + 1] for i in range(2)]
-                chg = max(abs(math.log(a / b)) for a, b in zip(r1, r2))
-                M['part_ratio_change'] = round(chg, 3)
-                if chg > 0.3:
-                    sg['parts'] = '%d large runs whose size ratios still change (%.2f, %.2f) -> (%.2f, %.2f)' % (len(big), r2[0], r2[1], r1[0], r1[1])
+            # compare the largest runs at two returns to the same end in the same state, a decade apart in steps
+            last = E[-1]
+            same = [e for e in E if e['side'] == last['side'] and e['state'] == last['state'] and e['steps'] <= last['steps'] / 10]
+            def top3(e):
+                fr2 = [c for b, c in tape_runs(e['tape']) if b]
+                mx2 = max(fr2) if fr2 else 0
+                return sorted([c for c in fr2 if c >= 10 and c >= 0.05 * mx2], reverse=True)[:3]
+            b1 = top3(last)
+            if same and len(b1) >= 3:
+                b2 = top3(same[-1])
+                if len(b2) >= 3:
+                    r1 = [b1[i] / b1[i + 1] for i in range(2)]; r2 = [b2[i] / b2[i + 1] for i in range(2)]
+                    chg = max(abs(math.log(a / b)) for a, b in zip(r1, r2))
+                    M['part_ratio_change'] = round(chg, 3)
+                    if chg > 0.5:
+                        sg['parts'] = ('largest runs at %s-end returns in state %s, a decade apart: size ratios (%.2f, %.2f) -> (%.2f, %.2f)'
+                                       % (last['side'], last['state'], r2[0], r2[1], r1[0], r1[1]))
         # lottery: irregular material between walls
         if fr and mx >= 20:
             smalltypes = len({b for b, c in tape_runs(F.split(None, 3)[3]) if b and c < 3})

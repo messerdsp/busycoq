@@ -53,6 +53,8 @@ for f in glob.glob(os.path.join(a.explorer, '*', 'status.json')) + glob.glob(os.
                              'summary': strip(d.get('summary'))[:400],
                              'verdict': strip(' '.join(d.get('verdict') or []))[:1200],
                              'nclaims': len(d.get('claims') or []),
+                             'asof': strip(d.get('asof') or '').replace('Status as of ', '').rstrip('.'),
+                             'readme_lines': sum(1 for _ in open(os.path.join(os.path.dirname(f), 'README.md'))) if os.path.exists(os.path.join(os.path.dirname(f), 'README.md')) else 0,
                              'kernel_claims': sum(1 for x in d.get('claims') or [] if x.get('level') == 'kernel')}
 ext = json.load(open(os.path.join(a.explorer, 'external.json')))
 for m, d in ext.get('machines', {}).items():

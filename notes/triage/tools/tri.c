@@ -15,6 +15,8 @@
 //         (side L: head at the left end moving left; R: at the right end moving right), the first 2000 such
 //         returns and then those whose index crosses 1.02^j; runlist = whole tape as block^count, or a skeleton
 //         (runs with count >= 3, gaps as [n]) when the tape has more than 120 runs.
+//   env EFROM=x [ECAP=n]: also log every return after step x (at most n of them; default 20000) for drift tests.
+//   env DUMP=1: print the final configuration cell by cell (for exact_check.sh).
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -123,7 +125,11 @@ int main(int argc, char **argv) {
             if (fresh) {
                 if (atL) lastL = recL; else lastR = recR;
                 long idx = recL + recR;
-                if (idx <= 2000 || idx >= ethr) {
+                static double efrom = -1; static long ecap = 0, eout = 0;
+                if (efrom < 0) { efrom = getenv("EFROM") ? atof(getenv("EFROM")) : 1e300; ecap = getenv("ECAP") ? atol(getenv("ECAP")) : 20000; }
+                int late = (double)steps >= efrom && eout < ecap;
+                if (late) eout++;
+                if (idx <= 2000 || idx >= ethr || late) {
                     if (idx > 2000) while (ethr <= idx) ethr *= 1.02;
                     fprintf(lg, "E %c ", atL ? 'L' : 'R'); pr128(lg, steps);
                     fputc(' ', lg); pr128(lg, cells(&L)); fputc(' ', lg); pr128(lg, cells(&R));

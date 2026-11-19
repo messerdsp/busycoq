@@ -6,7 +6,8 @@ Heuristic weights (see README "Method"):
   start 50; each fatal kind (lottery, collatz, nostruct, cryptid) -22, or -28 when simulation and notes agree;
   each manageable kind (drift, overflow, late, parts, rare) -5; compressible tape in simulation +8;
   rules proved in Rocq/Lean +10; an exact model/law +6; a reduction of halting to a precise statement +6;
-  being worked on elsewhere (dedicated busy-beaver-explorer folder) -10; a related table in an open PR -3.
+  being worked on elsewhere (dedicated busy-beaver-explorer folder) -10, or recent heavy work there (notes of 190+
+  lines with a status of 13 Nov 2026 or later) -8; a related table in an open PR -3.
 """
 import json, re, sys
 SRC, AN = sys.argv[1], sys.argv[2]
@@ -27,13 +28,15 @@ def note_signs(r):
     sg = {}
     if a.get('status') == 'cryptid' or s.get('status') == 'CRYPTID' or 'cryptid' in (w.get('desc', '') + w.get('name', '')).lower():
         sg['cryptid'] = 'labelled a (potential) cryptid'
-    if a.get('status') == 'lottery' or re.search(r'pseudo-?random|random walk|lottery|look(s)? random|random-looking|like random', tl):
+    if a.get('status') == 'lottery' or re.search(r'pseudo-?random|random walk|lottery|look(s)? random|random-looking|like random|look(s)? irregular|irregular lengths', tl):
         sg['lottery'] = 'notes: random-looking statistics decide halting'
     if re.search(r'collatz|\b\d/\d map|\b3x ?/ ?2|3n/2|x ?→ ?3x', tl):
         sg['collatz'] = 'notes: Collatz-like map'
     if 'spaghetti' in cls or re.search(r'chaotic (bell|fractal|1dca|ack)', cls) or 'no structure' in tl:
         sg['nostruct'] = 'notes/class: chaotic, no usable structure'
-    if 'overflow' in tl: sg['overflow'] = 'notes: overflows'
+    prose = ' '.join([a.get('note', ''), (r.get('explorer') or {}).get('summary', ''), (r.get('explorer') or {}).get('verdict', ''),
+                      s.get('notes', '')]).lower()
+    if re.search(r'(?<!shift-)overflow', prose): sg['overflow'] = 'notes: overflows'
     if re.search(r'drift|used up|slowly|eats ', tl): sg['drift'] = 'notes: slow drift'
     if re.search(r'\brare\b|exception', tl): sg['rare'] = 'notes: rare events/exceptions'
     if re.search(r'two counters|bi-counter|registers|independent|several (counters|parts)|two-stack|nested', tl): sg['parts'] = 'notes: several interacting parts'
@@ -63,10 +66,14 @@ for a in json.load(open(AN)):
     for k, v in pos.items(): score += v; parts.append('+%d %s' % (v, k))
     if m in ACTIVE: score -= 10; parts.append('-10 active (explorer folder)')
     if r.get('related_in_pr'): score -= 3; parts.append('-3 related table in open PR')
+    ex = r.get('explorer') or {}
+    day = int(re.match(r'(\d+)', ex.get('asof') or '0').group(1)) if re.match(r'(\d+)', ex.get('asof') or '') else 0
+    busy = m not in ACTIVE and ex.get('readme_lines', 0) >= 190 and day >= 13
+    if busy: score -= 8; parts.append('-8 recent heavy work in busy-beaver-explorer (%d-line notes, %s)' % (ex['readme_lines'], ex.get('asof')))
     if m in EXTRA: score += EXTRA[m]['bonus']; parts.append('%+d %s' % (EXTRA[m]['bonus'], EXTRA[m]['why']))
     out.append({'id608': r['id608'], 'machine': m, 'score': score, 'why': parts, 'sim_signs': ss, 'note_signs': ns,
                 'positive': pos, 'likely_halt_notes': lh, 'halted_sim': 'halt' in ss, 'metrics': met, 'K': a.get('K'),
-                'steps': a.get('steps'), 'active': m in ACTIVE, 'related_in_pr': r.get('related_in_pr', [])})
+                'steps': a.get('steps'), 'active': m in ACTIVE or busy, 'related_in_pr': r.get('related_in_pr', [])})
 out.sort(key=lambda x: -x['score'])
 json.dump(out, open(OUT, 'w'), indent=1)
 for x in out[:25]: print(x['score'], x['id608'], x['machine'], '|', ', '.join(x['why']))
