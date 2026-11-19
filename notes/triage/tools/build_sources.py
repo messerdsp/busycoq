@@ -58,6 +58,32 @@ ext = json.load(open(os.path.join(a.explorer, 'external.json')))
 for m, d in ext.get('machines', {}).items():
     c = canon(m)
     if c in by: by[c]['explorer_external'] = d
+known = json.load(open(os.path.join(a.explorer, 'known.json')))
+for m, d in known.items():
+    if m.startswith('_'): continue
+    c = canon(m)
+    if c in by: by[c]['wiki_label'] = {'name': d[0], 'desc': d[1], 'page': (d[2] or {}).get('page') if len(d) > 2 else None}
+for g in json.load(open(os.path.join(a.explorer, 'groups.json'))):
+    for m in g.get('machines', []):
+        c = canon(m)
+        if c in by: by[c]['explorer_family'] = g['group'] + ': ' + g.get('family', '')
+rel = json.load(open(os.path.join(a.explorer, 'related.json')))
+for kind in ('same_table', 'same_run', 'same_tapes'):
+    for g in rel.get(kind, []):
+        ms = [canon(m) for m in g['machines']]
+        for c in ms:
+            if c in by:
+                for o in ms:
+                    if o != c: by[c].setdefault('related', []).append([kind, by[o]['machine'] if o in by else o])
+for g in rel.get('slowed', []):
+    ms = [canon(g['slow']), canon(g['fast'])]
+    for c in ms:
+        if c in by:
+            for o in ms:
+                if o != c: by[c].setdefault('related', []).append(['slowed', by[o]['machine'] if o in by else o])
+for r in rows:
+    sib = [m for k, m in r.get('related', []) if canon(m) in by and by[canon(m)].get('pr')]
+    if sib: r['related_in_pr'] = sorted(set(sib))
 for d in json.load(open(a.ai)):
     c = canon(d['m'])
     if c in by: by[c]['ai'] = {'status': d['s'], 'note': d['t'], 'class': d['c'], 'simulated': d['r'], 'pr': d['p']}
@@ -66,6 +92,7 @@ json.dump(rows, open(os.path.join(a.out, 'sources.json'), 'w'), indent=1)
 cand = [r for r in rows if not r.get('pr') and not r.get('bb6_after_list') and not r.get('studied')]
 with open(os.path.join(a.out, 'candidates.txt'), 'w') as f:
     for r in cand: f.write(f"{r['id608']} {r['machine']}\n")
+print('with wiki label:', sum(1 for r in rows if r.get('wiki_label')), ' related machine in a PR:', sum(1 for r in cand if r.get('related_in_pr')))
 print('608 list:', len(rows), ' in open/unmerged PR:', sum(1 for r in rows if r.get('pr')),
       ' proved in BB6 after list:', sum(1 for r in rows if r.get('bb6_after_list')),
       ' studied:', sum(1 for r in rows if r.get('studied')), ' candidates:', len(cand))
