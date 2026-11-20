@@ -1,0 +1,2 @@
+115779 random counter starts (nested run at once), 100 trials, 1e+09 steps each, digits <= 5, up to 20 digits
+halted 0 of 100

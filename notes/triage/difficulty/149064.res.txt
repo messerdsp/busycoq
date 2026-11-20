@@ -1,0 +1,6 @@
+machine 1RB0LD_0RC1RA_1RD1RF_1LA0LE_0RA0LC_0RA--- K 8 from R-end return at step 1236805798176720, state B, 71 runs
+mode residues mod 12 kept max count 300 steps per trial 3e+08
+halted 0 of 60 
+machine 1RB0LD_0RC1RA_1RD1RF_1LA0LE_0RA0LC_0RA--- K 8 from R-end return at step 1236805798176720, state B, 71 runs
+mode free max count 300 steps per trial 3e+08
+halted 0 of 60 

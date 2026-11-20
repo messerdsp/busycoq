@@ -1,0 +1,2 @@
+machine 1RB1LC_1LA1RF_0RD1RD_0RA0LE_1LA0LE_0RC--- K 6 from R-end return at step 849875370285554594, state A, 10 runs
+mode residues mod 12 kept max count 60 steps per trial 1e+10

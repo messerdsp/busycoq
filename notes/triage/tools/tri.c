@@ -16,7 +16,14 @@
 //         returns and then those whose index crosses 1.02^j; runlist = whole tape as block^count, or a skeleton
 //         (runs with count >= 3, gaps as [n]) when the tape has more than 120 runs.
 //   env EFROM=x [ECAP=n]: also log every return after step x (at most n of them; default 20000) for drift tests.
+//   env INIT=file: start from a logged tape ("SIDE STATE runs..." with the back block in parentheses).
 //   env DUMP=1: print the final configuration cell by cell (for exact_check.sh).
+//   env SHAPE=1 [SHAPEMAX=n SHAPECAP=m]: at end returns (while the tape has < n runs, default 3000) reduce the tape
+//     to its shape (every run as block and min(count, 3)) and log a line
+//       C side steps distinct_shapes_so_far shape_changes is_new runs state | tape
+//     whenever the shape differs from the last one seen at the same side and state (at most m lines).
+//   env VOCAB=1 [VOCABMAX=n]: at end returns (tape < n runs, default 5000) collect every window of 3 consecutive runs
+//     (block, count capped at 3) and log  V side steps windows_so_far new_windows runs state | tape  when new ones appear.
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,7 +100,28 @@ int main(int argc, char **argv) {
         tw[s][y] = t[0] - '0'; tmv[s][y] = t[1] == 'R' ? 1 : -1; tn[s][y] = t[2] - 'A';
     }
     Stack L = {0}, R = {0}; int back = 0, s = 0, dr = 1;
-    u128 steps = 0; long nchain = 0, nsingle = 0, recL = 0, recR = 0, nextE = 0; double ethr = 4000;
+    if (getenv("INIT")) {
+        // start from a logged tape: one line "SIDE STATE run run ... (back) run ...", runs as BLOCK or BLOCK^N, K cells
+        // each; SIDE L: head at the left end moving left (nothing left of the tape); R: at the right end moving right.
+        FILE *f = fopen(getenv("INIT"), "r"); if (!f) { fprintf(stderr, "no INIT file\n"); return 2; }
+        char *line = NULL; size_t cap = 0; if (getline(&line, &cap, f) <= 0) return 2; fclose(f);
+        char *tok = strtok(line, " \n"); char side = tok[0]; tok = strtok(NULL, " \n"); s = tok[0] - 'A';
+        Run *tmp = NULL; long nt = 0, ct = 0, bi = -1;
+        while ((tok = strtok(NULL, " \n"))) {
+            int isb = tok[0] == '('; char *q = tok + isb; int b = 0;
+            for (int k = 0; k < K; k++) b |= (q[k] - '0') << k;
+            uint64_t n = 1; char *c = strchr(tok, '^'); if (c) n = strtoull(c + 1, NULL, 10);
+            if (nt == ct) { ct = ct ? 2 * ct : 1024; tmp = realloc(tmp, ct * sizeof(Run)); }
+            tmp[nt].b = b; tmp[nt].n = n; tmp[nt].pad = 0; if (isb) bi = nt; nt++;
+        }
+        if (bi < 0) { fprintf(stderr, "INIT: no (back) block\n"); return 2; }
+        back = tmp[bi].b;
+        for (long i = 0; i < bi; i++) push(&L, tmp[i].b, tmp[i].n);
+        for (long i = nt - 1; i > bi; i--) push(&R, tmp[i].b, tmp[i].n);
+        dr = side == 'R';
+        free(tmp);
+    }
+    u128 steps = 0; long nchain = 0, nsingle = 0, recL = 0, recR = 0; double ethr = 2000;
     int awayL = 1, awayR = 1; double nexts = 1; int qs = 0;
     const char *res = "RUN";
     clock_t t0 = clock(); long iter = 0;
@@ -122,6 +150,61 @@ int main(int argc, char **argv) {
         if (lg && ((atL && recL && awayL == 0 && iter) || (atR && awayR == 0))) {
             static long lastL = -1, lastR = -1;
             int fresh = atL ? (recL != lastL) : (recR != lastR);
+            static int shapemode = -1; static long shapemax = 3000, shapecap = 200000, shapeout = 0, ndist = 0, nchg = 0;
+            static uint64_t *seen = NULL, lasth[2][8];
+            if (shapemode < 0) {
+                shapemode = getenv("SHAPE") != NULL;
+                if (getenv("SHAPEMAX")) shapemax = atol(getenv("SHAPEMAX"));
+                if (getenv("SHAPECAP")) shapecap = atol(getenv("SHAPECAP"));
+                if (shapemode) seen = calloc((size_t)1 << 22, sizeof(uint64_t));
+            }
+            if (fresh && shapemode && L.len + R.len < shapemax) {
+                // shape = side, state, back block and every run as (block, min(count, 3)); log when it changes
+                uint64_t h = 1469598103934665603ULL ^ (uint64_t)(atL * 7 + s) * 1099511628211ULL ^ (uint64_t)back * 0x9E3779B97F4A7C15ULL;
+                for (long i = 0; i < L.len; i++) h = (h ^ ((uint64_t)L.r[i].b << 2 | (L.r[i].n < 3 ? L.r[i].n : 3))) * 1099511628211ULL;
+                h = (h ^ 0xABCDEF) * 1099511628211ULL;
+                for (long i = R.len - 1; i >= 0; i--) h = (h ^ ((uint64_t)R.r[i].b << 2 | (R.r[i].n < 3 ? R.r[i].n : 3))) * 1099511628211ULL;
+                if (!h) h = 1;
+                size_t mask = ((size_t)1 << 22) - 1, j = h & mask; int isnew = 0;
+                while (seen[j] && seen[j] != h) j = (j + 1) & mask;
+                if (!seen[j] && ndist < (long)(mask / 2)) { seen[j] = h; ndist++; isnew = 1; }
+                if (h != lasth[atL][s]) {
+                    nchg++; lasth[atL][s] = h;
+                    if (shapeout++ < shapecap) {
+                        fprintf(lg, "C %c ", atL ? 'L' : 'R'); pr128(lg, steps);
+                        fprintf(lg, " %ld %ld %d %ld %c |", ndist, nchg, isnew, L.len + R.len + 1, 'A' + s);
+                        prtape(lg, &L, back, &R); fputc('\n', lg);
+                    }
+                }
+            }
+            static int vocab = -1; static long vmax = 5000, vcap = 50000, vout = 0, nwin = 0;
+            static uint64_t *wset = NULL; static uint64_t *tok = NULL; static long tokcap = 0;
+            if (vocab < 0) {
+                vocab = getenv("VOCAB") != NULL;
+                if (getenv("VOCABMAX")) vmax = atol(getenv("VOCABMAX"));
+                if (vocab) wset = calloc((size_t)1 << 22, sizeof(uint64_t));
+            }
+            if (fresh && vocab && L.len + R.len + 1 < vmax) {
+                // local vocabulary: windows of 3 consecutive runs (block, count capped at 3; the back block marked)
+                long nt = L.len + R.len + 1;
+                if (nt > tokcap) { tokcap = 2 * nt; tok = realloc(tok, tokcap * sizeof(uint64_t)); }
+                long q = 0;
+                for (long i = 0; i < L.len; i++) tok[q++] = (uint64_t)L.r[i].b << 2 | (L.r[i].n < 3 ? L.r[i].n : 3);
+                tok[q++] = (uint64_t)back << 2 | 1ULL << 40;
+                for (long i = R.len - 1; i >= 0; i--) tok[q++] = (uint64_t)R.r[i].b << 2 | (R.r[i].n < 3 ? R.r[i].n : 3);
+                long newc = 0;
+                for (long i = 0; i + 2 < q; i++) {
+                    uint64_t h = ((tok[i] * 0x9E3779B97F4A7C15ULL) ^ (tok[i + 1] * 0xC2B2AE3D27D4EB4FULL) ^ (tok[i + 2] * 0x165667B19E3779F9ULL)) | 1;
+                    size_t mask = ((size_t)1 << 22) - 1, j = (h ^ (h >> 29)) & mask;
+                    while (wset[j] && wset[j] != h) j = (j + 1) & mask;
+                    if (!wset[j] && nwin < (long)(mask / 2)) { wset[j] = h; nwin++; newc++; }
+                }
+                if (newc && vout++ < vcap) {
+                    fprintf(lg, "V %c ", atL ? 'L' : 'R'); pr128(lg, steps);
+                    fprintf(lg, " %ld %ld %ld %c |", nwin, newc, nt, 'A' + s);
+                    prtape(lg, &L, back, &R); fputc('\n', lg);
+                }
+            }
             if (fresh) {
                 if (atL) lastL = recL; else lastR = recR;
                 long idx = recL + recR;

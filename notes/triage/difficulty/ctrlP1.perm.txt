@@ -1,0 +1,3 @@
+machine 1RB0LD_1LC1RB_0LA0LD_1LE0RB_1RF0RE_---0RD K 6 from L-end return at step 11257558884677817, state E, 17 runs
+mode permute + residues mod 12 kept max count 300 steps per trial 3e+08
+halted 0 of 60 

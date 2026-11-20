@@ -1,0 +1,22 @@
+decade  max_runs  new_windows
+1e1             3            1
+1e2             7           21
+1e3            24          126
+1e4            61          198
+1e5            80           85
+1e6            91           60
+1e7            97           13
+1e8           134          142
+1e9           136           16
+1e10          142            9
+1e11          151           12
+1e12          155           11
+1e13          161            5
+1e14          174           15
+1e15      6012636    untracked
+1e16      6012644    untracked
+1e17      6012647    untracked
+1e18      6012650    untracked
+1e19      6012653    untracked
+total windows 744; last new windows at steps: 4.51e+14 (+1), 5.14e+14 (+2), 6.52e+14 (+1), 8.48e+14 (+1), 1.37e+15 (+30)
+K=6 result=RUN steps=45476392999169315916 cells=9925536900 runs=6012654 macro=46807584767 chain=11953955775 secs=600.00 recL=1654256132 recR=14
