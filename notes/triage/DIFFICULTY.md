@@ -11,9 +11,9 @@ are heuristics that try to say *how much a proof would have to know*. Outputs ar
   survive every perturbation and every scaled run-out test, and their notes already contain most of the local
   rules in Lean.
 * **Not easier: 144438.** Scaled-down copies of its real tape **halt in 25 of 44 cases** when the far block runs
-  out, and changing block sizes by ±12 flips the outcome. It is better seen as a **halting candidate**: the
-  first comparable event in the real run is very roughly 10^21 to 10^22 steps away, possibly reachable by a long
-  simulation.
+  out, and changing block sizes by ±12 flips the outcome. It is better seen as a **halting candidate**, a coin flip
+  at each far-block run-out. It is **not** a quick halt by simulation: the real far block (about 2,840 words at
+  10^18) wears about 100 words per decade of steps, so it lasts to roughly 10^45 to 10^50 steps.
 * **13:** probably non-halting, and possible in principle. Nothing in these tests is random, and its overflow
   rule conserves mass. But its tape has 6 million runs after the second overflow, new unit types appear at every
   overflow, and its notes show two different overflow types plus a rule that drifts for small walls. Of all the
@@ -132,13 +132,15 @@ exactness check of `tri.c` still passes with the new code.
 
   So the next far-block run-out of the real run looks like a coin flip that depends on exact sizes: a lottery at
   each run-out, not a structure a proof can rely on.
-* *Timing:* the halt step scales smoothly (about scale^2.9: 5.3·10^14 at 1/192, 5.1·10^16 at 1/40). Extrapolated
-  very roughly, the real tape's first such event is around 10^21 to 10^22 steps.
-* *What to do next:* simulate the real run to that point. `tri.c` reached 9.9·10^18 in 10 CPU-minutes, and the
-  run is still going (see "Long runs" below). If it halts, the halting proof is a computation; if it survives, the
-  next run-out is the next coin flip.
-* *Difficulty for a non-halting proof:* hard, maybe cryptid-like. As a halt: possibly quick, if the event comes
-  within reach.
+* *Timing:* the far block wears about 90 to 100 words per decade of steps in the real run (3,672 at 10^10, 2,840 at
+  10^18; `difficulty/144438/far_block_wear.txt`). The 1/16 copy reached the same rate before its 173-word block ran
+  out near 10^18. So the run-out comes after about B/100 decades for a far block of B words: roughly 10^45 to 10^50
+  steps for the real tape. (A first extrapolation by scale factor, about 10^21 to 10^22, was wrong: the time is set
+  by the far block's size, not by the scale of the other blocks.)
+* *Next steps:* a halting argument would have to predict the exact block sizes at that run-out, far beyond
+  simulation: an accelerator at the level of the counter (one step per refill event), like the explorer's for
+  40361. A non-halting proof looks hard, maybe cryptid-like.
+* *Difficulty:* hard either way; the most interesting open question here is whether it halts.
 
 **112769 (+152969): upgraded from "Collatz-like risk" to "medium".**
 * *What it is:* the front level follows y ↦ 4y/3 (y ≡ 0), 4(y−2)/3+2 (y ≡ 2), and a separate reset regime for
@@ -187,12 +189,12 @@ Assessment: probably non-halting and provable in principle, but by far the large
 
 ## Long runs (144438)
 
-* **The 1/16 copy halts too**, at step 1.67·10^18 after its start (`difficulty/144438/`), in line with the
-  smaller copies. From the 1/40 and 1/16 halts the halt step grows like scale^2.9 to scale^3.8, which puts the
-  real tape's first comparable event at very roughly 5·10^21 to 6·10^22 steps.
-* The real run continues in checkpointed segments (`tools/longrun.py`, `tri.c` with `CKPT`; checkpoint and resume
-  are exact against the plain simulator). Copies at 1/8 and 1/4 run the same way to firm up the trend. Progress at
-  the time of writing is below; the checkpoints are in `difficulty/144438/` so the runs can be resumed:
+* **The 1/16 copy halts too**, at step 1.67·10^18 after its start (`difficulty/144438/scale16_run.txt`). Its far
+  block went 173 → 6 words between 10^14 and 10^18 and the machine halted at the far end right after it ran out.
+* The 1/8 copy (far block 369 at the start) was at 2.0·10^19 steps with 271 words left and no halt when it was
+  stopped. The 1/4 copy and the real tape were stopped early, once the wear rate showed that the real event is out
+  of reach. Checkpoint and resume (`tools/longrun.py`, `tri.c` with `CKPT`) are exact against the plain simulator,
+  and the checkpoints are in `difficulty/144438/`, so the runs can be resumed:
 
       python3 tools/longrun.py ./tri 1RB1LE_1LC1RE_1LE1LD_1LC0LA_1RF0LA_---0RA 6 DIR 1200 200 difficulty/144438/real_ckpt.txt OFFSET
 

@@ -7,7 +7,7 @@ else? This is a ranking for choosing what to work on next.
 
 **Follow-up (`DIFFICULTY.md`):** perturbation, vocabulary, run-out and scaled-restart tests on the top 10 and on 13.
 23154 (+115779) looks clearly easier than 13, and 19219 and 97939 probably are. 144438 is better seen as a halting
-candidate: scaled copies of its real tape halt in about half the cases. 112769 moves up, 65980 moves down. A warning sign is a
+candidate: scaled copies of its real tape halt in about half the cases, but the real event is about 10^45 steps out. 112769 moves up, 65980 moves down. A warning sign is a
 heuristic; a score is a sorting key, not a probability; "no halt" means no halt up to the step reached.
 
 Short answer:

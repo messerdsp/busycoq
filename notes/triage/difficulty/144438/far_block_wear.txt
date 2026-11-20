@@ -1,0 +1,3 @@
+# 144438: size of the far block (first run of >= 3 blocks from the right end) at left-end returns, last value per decade (simulated)
+scaled 1/16 copy (halts at 1.67e18): 1e8:173 1e9:173 1e10:173 1e11:173 1e12:173 1e13:175 1e14:173 1e15:167 1e16:148 1e17:52 1e18:6
+real run (to 9.9e18, vocab run): 1e8:799 1e9:736 1e10:3672 1e11:3586 1e12:3519 1e13:3445 1e14:3358 1e15:3263 1e16:3040 1e17:2934 1e18:2840
