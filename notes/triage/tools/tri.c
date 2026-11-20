@@ -17,6 +17,8 @@
 //         (runs with count >= 3, gaps as [n]) when the tape has more than 120 runs.
 //   env EFROM=x [ECAP=n]: also log every return after step x (at most n of them; default 20000) for drift tests.
 //   env INIT=file: start from a logged tape ("SIDE STATE runs..." with the back block in parentheses).
+//   env CKPT=file: when SECONDS are up, run on to the next return to an end and write the tape there in INIT format
+//     (result=CKPT); a long run can then be continued in segments.
 //   env DUMP=1: print the final configuration cell by cell (for exact_check.sh).
 //   env SHAPE=1 [SHAPEMAX=n SHAPECAP=m]: at end returns (while the tape has < n runs, default 3000) reduce the tape
 //     to its shape (every run as block and min(count, 3)) and log a line
@@ -126,7 +128,9 @@ int main(int argc, char **argv) {
     const char *res = "RUN";
     clock_t t0 = clock(); long iter = 0;
     while ((double)steps < MAXS) {
-        if ((++iter & 4095) == 0 && (double)(clock() - t0) / CLOCKS_PER_SEC > SECS) break;
+        static int stopping = 0; static const char *ckpt = (const char *)1;
+        if (ckpt == (const char *)1) ckpt = getenv("CKPT");
+        if ((++iter & 4095) == 0 && !stopping && (double)(clock() - t0) / CLOCKS_PER_SEC > SECS) { if (!ckpt) break; stopping = 1; }
         Stack *F = dr ? &R : &L, *Bk = dr ? &L : &R;
         int fac = F->len ? (int)F->r[F->len - 1].b : 0;
         MT *x = macro(s, dr, back, fac);
@@ -147,6 +151,14 @@ int main(int argc, char **argv) {
         if (!atL) awayL = 1;
         if (atR && awayR) { recR++; awayR = 0; }
         if (!atR) awayR = 1;
+        if (stopping && (atL || atR)) {    // checkpoint: the tape at this return, in INIT format
+            FILE *cf = fopen(ckpt, "w");
+            fprintf(cf, "%c %c", atL ? 'L' : 'R', 'A' + s);
+            for (long i = 0; i < L.len; i++) { fputc(' ', cf); prb(cf, L.r[i].b); if (L.r[i].n > 1) fprintf(cf, "^%llu", (unsigned long long)L.r[i].n); }
+            fputs(" (", cf); prb(cf, back); fputc(')', cf);
+            for (long i = R.len - 1; i >= 0; i--) { fputc(' ', cf); prb(cf, R.r[i].b); if (R.r[i].n > 1) fprintf(cf, "^%llu", (unsigned long long)R.r[i].n); }
+            fputc('\n', cf); fclose(cf); res = "CKPT"; break;
+        }
         if (lg && ((atL && recL && awayL == 0 && iter) || (atR && awayR == 0))) {
             static long lastL = -1, lastR = -1;
             int fresh = atL ? (recL != lastL) : (recR != lastR);

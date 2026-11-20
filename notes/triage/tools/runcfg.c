@@ -1,6 +1,6 @@
 // runcfg.c: run a 6-state 2-symbol machine from a given configuration (plain one-cell simulation).
 // usage: runcfg MACHINE STATE HEAD CELLS MAXSTEPS
-//   STATE: A..F; HEAD: index of the head's cell in CELLS (string of 0/1, blank elsewhere).
+//   STATE: A..F; HEAD: index of the head's cell in CELLS (string of 0/1, blank elsewhere; @file reads it from a file).
 // prints "HALT steps", "RUN steps maxcells" or "EDGE steps" (left the 2^25-cell window).
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +8,13 @@
 int main(int argc, char **argv) {
     if (argc < 6) { fprintf(stderr, "usage: runcfg MACHINE STATE HEAD CELLS MAXSTEPS\n"); return 2; }
     const char *m = argv[1]; int s = argv[2][0] - 'A'; long head = atol(argv[3]); const char *cells = argv[4];
+    if (cells[0] == '@') {      // CELLS = @file: read the cells from a file
+        FILE *f = fopen(cells + 1, "r"); if (!f) return 2;
+        fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
+        char *buf = malloc(n + 1); n = fread(buf, 1, n, f); buf[n] = 0; fclose(f);
+        while (n && (buf[n - 1] == '\n' || buf[n - 1] == ' ')) buf[--n] = 0;
+        cells = buf;
+    }
     double N = atof(argv[5]);
     int tw[6][2], tm[6][2], tn[6][2];
     for (int q = 0; q < 6; q++) for (int y = 0; y < 2; y++) {
