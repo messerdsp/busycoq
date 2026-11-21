@@ -11,8 +11,7 @@ New ccz181078/busycoq PRs since the triage (Alex Havrilla, 19 Nov):
 * **#104 proves 65980 never halts.**
 
 busycoq's `verify/Eqv_v2.v` already proves that 23154 halts iff `1RB0RD_0LC0RF_1RD0LB_1RE0LA_1RA1RC_1LB---`
-halts (TM567), and that 44531 halts iff `1RB0LD_1LC0RC_1RD1LA_1RB1RE_0LC1RF_---1RA` halts (TM421). A prompt for
-the next piece of work is in `NEXT_PROMPT.md`.
+halts (TM567), and that 44531 halts iff `1RB0LD_1LC0RC_1RD1LA_1RB1RE_0LC1RF_---1RA` halts (TM421).
 
 ## Short answers
 
