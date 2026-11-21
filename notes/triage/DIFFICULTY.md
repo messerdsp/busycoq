@@ -4,6 +4,16 @@ November 2026, after the triage in `README.md`. **Everything here is simulation.
 are heuristics that try to say *how much a proof would have to know*. Outputs are in `difficulty/` and
 `deep/`, and the tools are in `tools/`.
 
+## Update (20 Nov 2026)
+
+New ccz181078/busycoq PRs since the triage (Alex Havrilla, 19 Nov):
+* **#105 proves 144438 halts**, which agrees with the "halting candidate" finding below;
+* **#104 proves 65980 never halts.**
+
+busycoq's `verify/Eqv_v2.v` already proves that 23154 halts iff `1RB0RD_0LC0RF_1RD0LB_1RE0LA_1RA1RC_1LB---`
+halts (TM567), and that 44531 halts iff `1RB0LD_1LC0RC_1RD1LA_1RB1RE_0LC1RF_---1RA` halts (TM421). A prompt for
+the next piece of work is in `NEXT_PROMPT.md`.
+
 ## Short answers
 
 * **Easier than 13:** 23154 (with its twin 115779) clearly; 19219 (+44531, 157488) and 97939 (+ twin 99198)
