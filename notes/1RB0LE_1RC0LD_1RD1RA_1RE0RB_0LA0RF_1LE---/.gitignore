@@ -1,0 +1,4 @@
+tools/sweeps
+tools/dumpcfg
+tools/__pycache__/
+tools/*.o
