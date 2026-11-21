@@ -296,10 +296,50 @@ an even digit (in the traced case a carry3 left the digits [0,0,0,0,…]).
 This is the "reachable halting form" case of stage 1 item 3: the proof needs a numeric (parity) invariant on the
 digits tied to the frontier state, not only a language for the passed region.
 
+### Halting sweep starts inside the documented forms (*simulated*, the decisive finding)
+
+The documented sweep-start forms themselves contain halting configurations. A Y-phase sweep start
+`[1^r digits] 0 1 1 1 0 F> 0 1 0 W` (115779's names) with the counter ready to nest halts a few thousand steps later
+for these (r; digits), whatever the passed region W (checked with W = `001`, `p1^3 001`, `101010 p1 001`):
+
+| r | digits 1^m that halt (m = 1..12 tested) | steps |
+|---|---|---|
+| 6 | m = 6 | 2,251 |
+| 12 | m = 5 | 1,713 |
+| 18 | m = 11 | |
+| 24 | none up to 12 | |
+
+The same counters at an X-phase sweep start do not halt, and neither do their neighbours in phase Y. Mechanism: the
+nest leaves the Y-type boundary `B1 1 1 0`; the new inner counter `(3; 0^(2j+1))` eats its region of m−1 passed
+1s; when the region runs out the frontier meets the boundary in phase X, two sweeps later the context is
+`0 0 1 1 0 …`, and if the inner counter is ready to nest exactly then, the run halts. The post-nest form
+`Y (3; 0,0,0)` with region `p1^4 B1 1 1 0 …` halts at step 1,610 (4 of 4,368 tested post-nest states halt, all
+this one).
+
+What did not halt: post-outer-nest inner runs `(3; 0^(2j+1))` over regions of up to 800 passed 1s (595 runs,
+2·10^7 steps each); 155,500 boundary starts within their first outer sweep; 3.06 million small starts; the real run
+to 1.25·10^20 steps.
+
+So whether 23154 halts depends on whether some nested run, at some depth, nests in phase Y with a counter in this
+sparse, irregular set (or reaches the analogous coincidences for other digit lists). Inside a nested run the phase
+alternates every sweep, so this is a question about the parity and timing of the counter's left-end events relative
+to the lengths of regions, at every depth, for all future nested runs. The next outer nested run of 115779 is
+estimated at 10^800 sweeps away with an unknown digit list. A closed regular language cannot express this unless
+the coincidences are impossible for a simple reason, and none is visible: the halting set is not a residue class.
+
+## Decision: switch to the first fallback (19219)
+
+Switching criterion met: stage 1 found halting configurations inside the documented macro forms, reachable from
+forms the run produces (a nest from a phase-Y sweep start), and avoiding them needs a numeric invariant about the
+counter's states at nested-run boundaries at every depth. That is much harder than the 1–2 / 3–6 week estimate and
+not clearly possible with current methods. The work here (Rocq rules and sweeps, tools, data) stays usable for
+anyone who finds a reason why phase-Y nests never hit the halting set.
+
 ### Revised estimate
 
 Done in this session: stage 0, stage 1, the stage 2 attempts, and the Rocq foundation (all known rules). Left:
-items 1–5, plus the coupling invariant above. Revised: **5–8 weeks**, above the triage's 3–6. The case list still
+items 1–5, plus an invariant that excludes the halting sweep starts above. Revised: **unknown; at least months**,
+and possibly not provable without understanding all future nested runs. The case list still
 looks finite (a transducer with a few in-hand forms, a region grammar, and parity flags on the digits), but the
 coupling between counter digits and frontier context is a new kind of obligation: it needs a lemma about which
 digit lists can occur right after each frontier event, proved for all digit lists.
