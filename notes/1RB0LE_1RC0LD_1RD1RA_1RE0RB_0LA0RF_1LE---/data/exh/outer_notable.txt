@@ -1,0 +1,3 @@
+P 12 1,1,1,1,1,1 | OK 1830 events=23 maxregions=2 | Q r=3 0 0 0 3 1 1 1 1 1 0
+P 12 1,1,1,1,1,3 | BADW 1032 events=13 maxregions=1 | Y at t=1032
+P 12 1,1,1,1,1,5 | BADW 1044 events=13 maxregions=1 | Y at t=1044

@@ -1,0 +1,4 @@
+total 924018 ok 924016 halt 0 bad 2 timeout 0 nested 3276
+total 924018 ok 924018 halt 0 bad 0 timeout 0 nested 2184
+total 897104 ok 897104 halt 0 bad 0 timeout 0 nested 0
+total 318240 ok 295938 halt 0 bad 22302 timeout 0 nested 182760

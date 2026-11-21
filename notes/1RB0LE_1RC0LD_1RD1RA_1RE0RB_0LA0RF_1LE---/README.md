@@ -108,6 +108,91 @@ scaled-restart test.
    (no `0 0 1 1` in front of a right-moving B).
 3. Everything in Rocq: none of the Lean work is in Rocq; it all has to be re-proved here.
 
-## Stage 1: more testing
+## Stage 1: more testing (all *simulated*)
 
-(in progress)
+Tools (in `tools/`; all use 115779's state names, 23154 is mapped by A→E, B→A, C→B, D→C, E→D):
+`sweeps.c` (sweep-start events P/Q/X/Y with the passed region's shape), `exh.c` + `gen_exh.py` (exhaustive test),
+`cells.py` (cell-level trace), `rpass.py` (where a right pass stops), `hyp.py`, `outside.py`, `nearmine.py`
+(language mining). Checked against the explorer's numbers: `sweeps blank23154` reproduces the nested runs at
+sweeps 5 and 28 and the tape `Q r=3 [0,0,1,1,1,0,2,1^10]` at step 5,512; `sweeps P 3 0,2,2,1,1,1,1,1,2,0` reproduces
+`P r=3 0 2 2 1 1 1 1 1 4` after 21 steps (`reach_D1`).
+
+### 1. Exhaustive small cases (`tools/exh.c`, results in `data/exh/`)
+
+Each start is run to the next sweep start at the outer right end (or 10^8 steps); every sweep start on the way
+(outer P/Q and inner X/Y) is checked against the documented forms: left part `1^r` (r ≡ 0 mod 3) then digits
+`0 1^(3d+2)`; passed region W (see 3 below).
+
+| starts | number | halts | left the forms | nested runs | timeouts |
+|---|---|---|---|---|---|
+| P and Q, r = 3..30 (step 3), up to 6 digits, each 0..6 | 2,745,140 | **0** | 2 (see below) | 5,460 (1 of depth 2) | 0 |
+| X and Y, r = 3..18, up to 3 digits 0..3, W = `(101010)^{0,1}` + up to 3 blocks of {B1, B1 110, B2, B5, B8} + `001` | 318,240 | **0** | 22,302 | 182,760 | 0 |
+
+(B_n = `0 0 (1 0)^n`; a passed digit 2k+1 is B_(3k+2), the "token" T; U = `1 0 1 0 1 0`.)
+
+* The 2 outer starts that left the forms (`P 12 1,1,1,1,1,3` and `...,5`) start a nested run inside a nested run while
+  the passed region begins with a partial token, so a region boundary B1 can be followed by U's. With the region
+  language widened to that, they pass.
+* Every inner start that leaves the forms has a synthetic W that the machine does not seem to build (for example an
+  empty region `B1 001`); they still never halt. The shortest: `X 6 [0] W=0010001` gives a Y sweep start with right
+  part `0 1 0`.
+* So: **no halting configuration was found in 3.06 million starts**, and the documented sweep forms are closed on all
+  outer starts up to these sizes, once the passed-region language below is used.
+
+### 2. The nested run, as seen (simulated)
+
+* The inner counter is the same counter: left of the frontier the digits follow the outer rule, and the left-end
+  events (carry3, carry9, merges, and new nested runs) are the outer ones, because the counter's left end *is* the
+  tape's left end. Only the right end differs: a frontier inside the passed region W.
+* The frontier eats W six cells per X→Y→X pair of sweeps: from X it eats `0 0 1 0 1 0` (Lean, proved) or `1 0 1 0 1 0`
+  (the rest of a longer token; other end shapes, not yet formalized), from Y nothing.
+* A nested run started from a sweep in phase φ makes `W' = U^a T* E_φ W`, where T* are the passed digits (all odd,
+  because a nested run starts only when every digit is odd), `U^a` is left when the first digit is 2a+1 > 1, and
+  `E_φ` is the end piece of φ: `0 0 1` (outer end, P), `B1` (X), `B1 1 1 0` (Y). So at every sweep start,
+  `W ∈ R (B1 (110)? R)* 0 0 1` with `R = U* T*` (simulated on all runs above; never violated by real runs).
+* End of a region: depth 1 (frontier reaches the final `0 0 1`): the run continues at the outer end in phase Q (or
+  P, or X/Y with nothing to the right). Depth ≥ 2 (frontier reaches a boundary B1): the next region is
+  "closed up": the head runs right turning it into one large odd digit; with more regions behind, constructed
+  cases end in P, Q, or back at a depth-1 frontier (`data/` runs in this README's history; e.g. W with regions
+  [2],[5] → Q with a new digit 45 in `P(6; 1^30)`). None halts.
+* Depth ≥ 3 was not reached from any of 60 random starts in 3·10^7 steps (`tools/deep.py`): the counter reaches its
+  left end at super-exponentially growing intervals, so deep nesting needs huge passed regions. A proof still has to
+  cover every depth; the region language above is depth-free.
+
+### 3. Halting forms
+
+The machine halts only when a right-moving head (B, C, D, then F) meets `0 0 1 1`. In every test above no halt
+occurred; in the region language above, `1 1` occurs only inside the Y end piece `B1 1 1 0`, which the frontier
+reaches only in phase X (y_right). No reachable halting form was found.
+
+### 4. Revised estimate after stage 1
+
+The nested run has a finite description (a regular language for W plus a finite set of frontier events), and it
+recurses only through the left-end rule, which is the same at every depth. Nothing found points to a halt or to
+unbounded case lists. But the frontier has more cases than the Lean files cover (partial tokens U, the Y end piece,
+region boundaries, closing up, several outer-end phases), so a hand proof is at the upper end of the estimate
+(4–6 weeks) unless a closed language can be built (stage 2).
+
+## Stage 2: closed tape language
+
+### Generic deciders: none closes
+
+* busycoq `RWL_mod` in Rocq (`decide_nonhalt`, 236 settings of block size 1/2/3/6, mod 3/6, cap 2/4, windows 2–8,
+  tail 0–2, on 23154, 115779 and TM567, 60 s each): all `false` or timeout (`data/rwl_coq_grid_results.txt`).
+* mxdys's C++ deciders (ccz181078/TM `main.cpp` built for 6 states, same algorithms as busycoq's): `RWL_mod`
+  1,296 settings (`data/tmtools_grid_rwl.txt`), `CPS_LRU` and `NG` 1,680 settings (`data/tmtools_grid_cps_ng.txt`,
+  about half completed in the time limit): none decides any of the three machines.
+
+This agrees with the explorer's note: the generic window languages forget the far structure (block lengths mod 3
+of the passed region and the left end).
+
+### Hand-built language (in progress)
+
+`tools/ctl.py` is a CTL checker with explicit DFAs and the semantics of busycoq's CTL / `MITMDFA` certificate (a
+head between cells facing a side, DFAs read each half from the far end, predecessor enumeration on moves). A
+closed result can be exported as `MITMDFA` arrays (`mitm_cert`) and checked in Rocq. The DFAs are built from
+regular expressions (`lang2.py`): left `0* 1^(3a) (0 1^(3d+2))* (0 1*)? .{0,3}`; right
+`NEAR (U | T | B1 | B1 110)* END`, times a tracker of the last few cells and of 1-run and `10`-run lengths mod 6.
+Status: not closed yet. Every remaining failure is a spurious abstract path through transient near-head forms
+(carry at the left end, nest start, closing up, outer-end phases); the real runs stay inside the language
+(`outside.py`). Continuing.

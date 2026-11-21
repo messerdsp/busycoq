@@ -177,6 +177,34 @@ def track(dfa, K=1, mod=6, cap=3):
     nacc = {ids[k] for k in ids if k[0] in acc}
     return nd, 0, nacc, DEAD
 
+def track2(dfa, win=6, mod=6, cap=3):
+    """Product of a language DFA with: the last `win` cells exactly, the length of the current run of 1s (capped,
+    mod `mod`) and the length of the current alternating run ...1010 / ...0101 (mod `mod`).  Start loops on 0."""
+    delta, s0, acc, dead = dfa
+    def upd(tr, a):
+        if tr == 'far':
+            if a == 0: return 'far'
+            return ((1,), (1, 1), 1)
+        w, (c1, m1), alt = tr
+        w2 = (w + (a,))[-win:]
+        if a == 1: c1n, m1n = min(c1 + 1, cap), (m1 + 1) % mod
+        else: c1n, m1n = 0, 0
+        alt2 = (alt + 1) % (2 * mod) if (len(w) and w[-1] != a) else 1
+        return (w2, (c1n, m1n), alt2)
+    start = (s0, 'far'); ids = {start: 0}; Q = [start]; nd = []; i = 0; DEAD = None
+    while i < len(Q):
+        q, tr = Q[i]; row = []
+        for a in (0, 1):
+            nq = delta[q][a]
+            n = (nq, 'dead') if nq == dead else (nq, upd(tr, a))
+            if n not in ids: ids[n] = len(Q); Q.append(n)
+            row.append(ids[n])
+        nd.append(row); i += 1
+    for k, v in ids.items():
+        if k[1] == 'dead': DEAD = v
+    nacc = {ids[k] for k in ids if k[0] in acc}
+    return nd, 0, nacc, DEAD
+
 def sample_word(delta, target, maxlen=60):
     """A shortest word from 0 to target (as read from the far end)."""
     prev = {0: None}; dq = deque([0])
@@ -199,11 +227,13 @@ def parse_tm(s):
             t[(chr(65 + i), b)] = None if c[2] not in 'ABCDEF' else (int(c[0]), c[1], c[2])
     return t
 
-def check(tm_str, left_re, right_re, start='A', maxconf=2_000_000, verbose=True, K=1, mod=6, cap=3, init=None):
+def check(tm_str, left_re, right_re, start='A', maxconf=2_000_000, verbose=True, K=1, mod=6, cap=3, init=None, win=6):
     """init: optional (left cells far->head, state, right cells head->far) to start from instead of blank."""
     tm = parse_tm(tm_str)
     dL = to_dfa(left_re); dR = to_dfa(right_re, reverse=True)
-    if K:
+    if K == 'w':
+        dL = track2(dL, win, mod, cap); dR = track2(dR, win, mod, cap)
+    elif K:
         dL = track(dL, K, mod, cap); dR = track(dR, K, mod, cap)
     res = {'nL': len(dL[0]), 'nR': len(dR[0])}
     for nm, d in (('left', dL), ('right', dR)):
