@@ -1,0 +1,266 @@
+iter 0: 23 contexts, 1 front shapes, 0 bad
+iter 1: 45 contexts, 3 front shapes, 0 bad
+iter 2: 56 contexts, 17 front shapes, 0 bad
+iter 3: 67 contexts, 18 front shapes, 0 bad
+iter 4: 73 contexts, 19 front shapes, 0 bad
+iter 5: 79 contexts, 19 front shapes, 0 bad
+iter 6: 84 contexts, 19 front shapes, 0 bad
+iter 7: 89 contexts, 19 front shapes, 0 bad
+iter 8: 93 contexts, 19 front shapes, 0 bad
+iter 9: 97 contexts, 19 front shapes, 0 bad
+iter 10: 101 contexts, 19 front shapes, 0 bad
+iter 11: 105 contexts, 19 front shapes, 0 bad
+iter 12: 108 contexts, 19 front shapes, 0 bad
+iter 13: 177 contexts, 19 front shapes, 0 bad
+iter 14: 312 contexts, 19 front shapes, 0 bad
+iter 15: 480 contexts, 29 front shapes, 0 bad
+iter 16: 680 contexts, 38 front shapes, 0 bad
+iter 17: 876 contexts, 40 front shapes, 0 bad
+iter 18: 1066 contexts, 49 front shapes, 0 bad
+iter 19: 1214 contexts, 54 front shapes, 0 bad
+iter 20: 1320 contexts, 65 front shapes, 0 bad
+iter 21: 1408 contexts, 65 front shapes, 0 bad
+iter 22: 1479 contexts, 65 front shapes, 0 bad
+iter 23: 1541 contexts, 65 front shapes, 0 bad
+iter 24: 1598 contexts, 65 front shapes, 0 bad
+iter 25: 1650 contexts, 65 front shapes, 0 bad
+iter 26: 1942 contexts, 65 front shapes, 0 bad
+iter 27: 2650 contexts, 65 front shapes, 0 bad
+iter 28: 3831 contexts, 81 front shapes, 0 bad
+iter 29: 5592 contexts, 85 front shapes, 0 bad
+iter 30: 7854 contexts, 87 front shapes, 0 bad
+iter 31: 10536 contexts, 96 front shapes, 0 bad
+iter 32: 13381 contexts, 102 front shapes, 0 bad
+BAD B1 0 0 1 1 0 B2 E 1 ('HALT', 7)
+   <- f : B1 1 1 0 0 0 1 1 0 B2 E 0
+   <- N0,[] : 0 0 1 1 0 B2 E 12
+   <- f : B1 1 1 1 0 B2 E 12
+   <- f : B1 B1 1 1 0 B2 E 12
+   <- f : B1 1 1 0 B1 1 1 0 B2 E 12
+   <- f : B1 B2 B1 1 1 0 B2 E 12
+   <- f : B1 1 1 0 B2 B1 1 1 0 B2 E 12
+   <- f : B1 B2 B2 B1 1 1 0 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B1 1 1 0 B2 E 10
+   <- f : B1 B2 B2 B2 B1 1 1 0 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B1 1 1 0 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B1 1 1 0 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B1 1 1 0 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : B1 1 1 0 B2 E 12
+   <- f : B1 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 E 10
+   <- f : B1 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : E 12
+BAD B4 0 0 1 1 0 B2 E 1 ('HALT', 15)
+   <- f : B1 1 U 1 0 0 0 1 1 0 B2 E 0
+   <- N1,[] : 0 0 1 1 0 B2 E 12
+   <- f : B1 1 1 1 0 B2 E 12
+   <- f : B1 B1 1 1 0 B2 E 12
+   <- f : B1 1 1 0 B1 1 1 0 B2 E 12
+   <- f : B1 B2 B1 1 1 0 B2 E 12
+   <- f : B1 1 1 0 B2 B1 1 1 0 B2 E 12
+   <- f : B1 B2 B2 B1 1 1 0 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B1 1 1 0 B2 E 10
+   <- f : B1 B2 B2 B2 B1 1 1 0 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B1 1 1 0 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B1 1 1 0 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B1 1 1 0 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : B1 1 1 0 B2 E 12
+   <- f : B1 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 E 10
+   <- f : B1 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : E 12
+BAD B1 0 0 1 1 0 B2 B2 B2 E 1 ('HALT', 7)
+   <- f : B1 1 1 0 0 0 1 1 0 B2 B2 B2 E 0
+   <- N0,[] : 0 0 1 1 0 B2 B2 B2 E 12
+   <- f : B1 1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B2 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B2 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B1 1 1 0 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B1 1 1 0 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0, 0, 0] : E 12
+BAD B4 0 0 1 1 0 B2 B2 B2 E 1 ('HALT', 15)
+   <- f : B1 1 U 1 0 0 0 1 1 0 B2 B2 B2 E 0
+   <- N1,[] : 0 0 1 1 0 B2 B2 B2 E 12
+   <- f : B1 1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B2 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B2 B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B1 1 1 0 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B1 1 1 0 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : B1 1 1 0 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0, 0, 0] : E 12
+BAD B1 0 0 1 1 0 B2 B2 B2 B2 B2 B2 E 1 ('HALT', 7)
+   <- f : B1 1 1 0 0 0 1 1 0 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[] : 0 0 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] : E 12
+BAD B4 0 0 1 1 0 B2 B2 B2 B2 B2 B2 E 1 ('HALT', 15)
+   <- f : B1 1 U 1 0 0 0 1 1 0 B2 B2 B2 B2 B2 B2 E 0
+   <- N1,[] : 0 0 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 1 1 0 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B1 1 1 0 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0] : B1 1 1 0 B2 B2 B2 B2 B2 B2 E 12
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 E 11
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 E 10
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 E 9
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 E 8
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 7
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 6
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 5
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 4
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 3
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 2
+   <- f : B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 1
+   <- f : B1 1 1 0 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 E 0
+   <- N0,[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] : E 12
+iter 33: 16109 contexts, 118 front shapes, 6 bad
+iter 34: 18562 contexts, 140 front shapes, 6 bad
+iter 35: 20560 contexts, 145 front shapes, 18 bad
+iter 36: 22190 contexts, 162 front shapes, 18 bad
+iter 37: 23502 contexts, 168 front shapes, 29 bad
+iter 38: 24614 contexts, 169 front shapes, 29 bad
+iter 39: 26508 contexts, 169 front shapes, 34 bad
+iter 40: 30516 contexts, 169 front shapes, 34 bad
+iter 41: 38010 contexts, 177 front shapes, 35 bad
+iter 42: 50680 contexts, 182 front shapes, 35 bad
+iter 43: 69694 contexts, 184 front shapes, 35 bad
+iter 44: 95829 contexts, 195 front shapes, 35 bad
+iter 45: 128678 contexts, 200 front shapes, 35 bad
+iter 46: 166643 contexts, 214 front shapes, 53 bad
+iter 47: 207417 contexts, 229 front shapes, 74 bad
+iter 48: 248015 contexts, 240 front shapes, 128 bad
+iter 49: 286058 contexts, 255 front shapes, 185 bad
+iter 50: 319789 contexts, 276 front shapes, 272 bad
+iter 51: 348596 contexts, 305 front shapes, 354 bad
+iter 52: 376029 contexts, 324 front shapes, 438 bad
+iter 53: 409551 contexts, 339 front shapes, 510 bad
+iter 54: 460592 contexts, 364 front shapes, 563 bad
+iter 55: 544614 contexts, 370 front shapes, 603 bad
+iter 56: 680530 contexts, 373 front shapes, 623 bad
+iter 57: 886873 contexts, 383 front shapes, 636 bad
+iter 58: 1178673 contexts, 388 front shapes, 640 bad
+iter 59: 1561841 contexts, 398 front shapes, 708 bad
+iter 60: 2031907 contexts, 419 front shapes, 831 bad
+iter 61: 2570985 contexts, 433 front shapes, 1134 bad

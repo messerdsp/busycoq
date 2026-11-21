@@ -1,0 +1,10 @@
+iter 0: 14 contexts, 1 front shapes, 0 bad
+iter 1: 128 contexts, 3 front shapes, 0 bad
+iter 2: 864 contexts, 16 front shapes, 0 bad
+iter 3: 3041 contexts, 29 front shapes, 0 bad
+iter 4: 9023 contexts, 80 front shapes, 0 bad
+iter 5: 22227 contexts, 110 front shapes, 0 bad
+iter 6: 49138 contexts, 170 front shapes, 0 bad
+iter 7: 108117 contexts, 206 front shapes, 21 bad
+iter 8: 228244 contexts, 364 front shapes, 192 bad
+iter 9: 426441 contexts, 473 front shapes, 732 bad

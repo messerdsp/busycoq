@@ -257,10 +257,54 @@ Items 1–3 are a finite case list (every case seen in simulation so far is one 
 case is an `es`-provable rule plus bookkeeping like `inner_X_zero`. The case list has to be completed first by
 simulation (`tools/rpass.py`, `tools/exh.c`), then each case proved.
 
+### The frontier as a transducer, and halting forms in the macro model (*simulated*; new)
+
+Because the core of every sweep leaves the right context t unchanged (`core_zero`, `core_even`), the frontier is a
+map from an *arrival* (`... 0 1^(3c+3) B> t`, end of a right pass) to the next *left-pass start*
+(`digits E> 0 t'`), plus nest starts, which prepend: `t → B1 110 U^a T^m t` (a nest from a left-pass start with
+context t). Simulated values of the arrival map (`tools/arrive.py`):
+
+| arrival at | next left-pass start |
+|---|---|
+| `E` | `E` |
+| `B1 B2 W` | `B1 110 W` (a token eaten; = `x_right` then `y_left`) |
+| `B1 110 W` | `B1 W` (= `y_right` then `x_left`) |
+| `B1 U^a B2 W` | `B1 110 W`, the U's become 2a digits 0 (passes through another in-hand form, `0 1 1 0 B>`) |
+| `B1 E` | `B1 1` + blank |
+| `B1 B1 110 W` (X frontier at a Y-type boundary) | `B1 1 1 1 0 W` |
+| `B1 1 1 1 0 W` | `0 0 1 1 0 W` |
+
+**Halting forms exist in the macro model.** A left-pass start with context `0 0 1 1 0 W` and a counter that is
+ready to nest (r even, every digit odd) halts within a few hundred steps: checked on the real machine for
+(r, digits) = (6,[1]), (6,[1,1]), (12,[1,3]), (6,[1,1,1,1]), (12,[1]) and three different W, all halt (118 to 606
+steps). And contexts `0 0 1 1 0 W` do occur: from a Y-phase start with `W = B1 110 B2 E` the real machine reaches a
+left-pass start with context `0 0 1 1 0 B2 E` at step 178 (its digits are then [0,0,0,0,1,1], so it does not nest,
+and it goes on without halting). The chain is: a nest started from a Y-phase sweep leaves the boundary
+`B1 1 1 0`; when that nested region is used up, the frontier meets the boundary in phase X; two sweeps later the
+context is `0 0 1 1 0 W`.
+
+So a closure on t alone does not work: the search `tools/closure.py`, which lets nests happen at any time
+(`data/closure_nogap.txt`), or only 12 or more sweeps after the previous nest (the shortest gap seen from a post-nest
+counter, `data/closure_gap12.txt`), reaches halting contexts. **The invariant has to couple the counter's digits
+with the frontier context**, at least: "whenever the context is `0 0 1 1 0 …` (or one of the few contexts leading
+to it), the counter is not ready to nest". Evidence that this coupling holds: no halt in 155,500 constructed starts
+with the frontier facing a Y-type boundary (X and Y phases, r = 3..30, every digit list up to 4 digits 0..5,
+five tails; `data/exh/ytype_boundary_summary.txt`), none in the 3.06 million starts of section 1, and none in the
+real run to 10^20 steps. A plausible reason (not checked): the sweep before such a context is a carry or ends with
+an even digit (in the traced case a carry3 left the digits [0,0,0,0,…]).
+
+This is the "reachable halting form" case of stage 1 item 3: the proof needs a numeric (parity) invariant on the
+digits tied to the frontier state, not only a language for the passed region.
+
 ### Revised estimate
 
 Done in this session: stage 0, stage 1, the stage 2 attempts, and the Rocq foundation (all known rules). Left:
-items 1–5, about 3–4 weeks of focused work by the stage-1 picture; the main risk is that the closure of the region
-grammar under the frontier events is larger than the grammar seen in real runs (the random-order test produced
-new block types), which would make the invariant longer but, from everything seen, still finite. Nothing so far
-meets a switching criterion (no halt, no unbounded case list, not twice over the estimate).
+items 1–5, plus the coupling invariant above. Revised: **5–8 weeks**, above the triage's 3–6. The case list still
+looks finite (a transducer with a few in-hand forms, a region grammar, and parity flags on the digits), but the
+coupling between counter digits and frontier context is a new kind of obligation: it needs a lemma about which
+digit lists can occur right after each frontier event, proved for all digit lists.
+
+Switching criteria (from the task): not met so far. No halt was found from any reachable-looking configuration;
+the nested run has a finite description; but the halting forms in the macro model mean the remaining work is
+clearly more than the original estimate. If the coupling lemma turns out to need the full digit history (not a
+few flags), that is the point to switch to the next fallback (19219).
