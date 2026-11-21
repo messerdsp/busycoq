@@ -1,0 +1,42 @@
+1016892 starts (n in [2, 8, 24], prefixes ['', '01'], 47 tails, up to 3 blocks of sizes [0, 1, 2, 3, 5, 8]), 1e+06 steps each
+halted: 155970 of 1016892
+  n=2 prefix='' blocks=(0,) seps= tail='11' -> HALT 135
+  n=2 prefix='' blocks=(2,) seps= tail='11' -> HALT 7831
+  n=2 prefix='' blocks=(0, 0) seps=p tail='11' -> HALT 159
+  n=2 prefix='' blocks=(0, 5) seps=p tail='11' -> HALT 80444
+  n=2 prefix='' blocks=(0, 5) seps=s tail='11' -> HALT 80590
+  n=2 prefix='' blocks=(1, 0) seps=p tail='11' -> HALT 985
+  n=2 prefix='' blocks=(1, 0) seps=s tail='11' -> HALT 461
+  n=2 prefix='' blocks=(2, 3) seps=p tail='11' -> HALT 118438
+  n=2 prefix='' blocks=(3, 0) seps=q tail='11' -> HALT 3298
+  n=2 prefix='' blocks=(3, 1) seps=r tail='11' -> HALT 4382
+  n=2 prefix='' blocks=(3, 1) seps=q tail='11' -> HALT 119482
+  n=2 prefix='' blocks=(3, 3) seps=q tail='11' -> HALT 133792
+  n=2 prefix='' blocks=(5, 1) seps=p tail='11' -> HALT 29157
+  n=2 prefix='' blocks=(5, 1) seps=s tail='11' -> HALT 20511
+  n=2 prefix='' blocks=(8, 5) seps=s tail='11' -> HALT 255596
+  n=2 prefix='' blocks=(0, 0, 0) seps=pp tail='11' -> HALT 183
+  n=2 prefix='' blocks=(0, 0, 0) seps=sp tail='11' -> HALT 329
+  n=2 prefix='' blocks=(0, 0, 0) seps=ss tail='11' -> HALT 227
+  n=2 prefix='' blocks=(0, 0, 1) seps=rq tail='11' -> HALT 7831
+  n=2 prefix='' blocks=(0, 0, 1) seps=rp tail='11' -> HALT 7743
+  n=2 prefix='' blocks=(0, 0, 1) seps=qs tail='11' -> HALT 7811
+  n=2 prefix='' blocks=(0, 0, 5) seps=rr tail='11' -> HALT 80522
+  n=2 prefix='' blocks=(0, 0, 5) seps=ss tail='11' -> HALT 80512
+  n=2 prefix='' blocks=(0, 1, 0) seps=pq tail='11' -> HALT 7665
+  n=2 prefix='' blocks=(0, 1, 0) seps=pp tail='11' -> HALT 1135
+  n=2 prefix='' blocks=(0, 1, 0) seps=ps tail='11' -> HALT 539
+  n=2 prefix='' blocks=(0, 1, 0) seps=sq tail='11' -> HALT 7811
+  n=2 prefix='' blocks=(0, 1, 0) seps=sp tail='11' -> HALT 1281
+  n=2 prefix='' blocks=(0, 1, 0) seps=ss tail='11' -> HALT 685
+  n=2 prefix='' blocks=(0, 1, 1) seps=rs tail='11' -> HALT 7665
+  n=2 prefix='' blocks=(0, 1, 3) seps=qr tail='11' -> HALT 81118
+  n=2 prefix='' blocks=(0, 2, 0) seps=ps tail='11' -> HALT 11199
+  n=2 prefix='' blocks=(0, 2, 0) seps=ss tail='11' -> HALT 11345
+  n=2 prefix='' blocks=(0, 2, 2) seps=qq tail='11' -> HALT 81004
+  n=2 prefix='' blocks=(0, 2, 2) seps=qp tail='11' -> HALT 80862
+  n=2 prefix='' blocks=(0, 2, 3) seps=rr tail='11' -> HALT 80972
+  n=2 prefix='' blocks=(0, 3, 0) seps=pq tail='11' -> HALT 3638
+  n=2 prefix='' blocks=(0, 3, 0) seps=ps tail='11' -> HALT 13997
+  n=2 prefix='' blocks=(0, 3, 0) seps=sq tail='11' -> HALT 3784
+  n=2 prefix='' blocks=(0, 3, 0) seps=ss tail='11' -> HALT 14143
