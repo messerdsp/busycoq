@@ -2,3 +2,9 @@ tools/sweeps
 tools/dumpcfg
 tools/__pycache__/
 tools/*.o
+*.vo
+*.vok
+*.vos
+*.glob
+.*.aux
+.lia.cache
