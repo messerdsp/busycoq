@@ -8,3 +8,5 @@ tools/*.o
 *.glob
 .*.aux
 .lia.cache
+tools/exh
+tools/*.out

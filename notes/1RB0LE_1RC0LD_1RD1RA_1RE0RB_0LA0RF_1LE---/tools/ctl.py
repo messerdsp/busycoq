@@ -205,6 +205,45 @@ def track2(dfa, win=6, mod=6, cap=3):
     nacc = {ids[k] for k in ids if k[0] in acc}
     return nd, 0, nacc, DEAD
 
+def build_abs(upd, maxstates=200000):
+    """DFA from an incremental abstraction: upd(state, a) -> state, start 'far' (must map 'far',0 -> 'far')."""
+    ids = {'far': 0}; Q = ['far']; nd = []; i = 0
+    while i < len(Q):
+        row = []
+        for a in (0, 1):
+            n = upd(Q[i], a)
+            if n not in ids:
+                ids[n] = len(Q); Q.append(n)
+                if len(Q) > maxstates: raise RuntimeError('too many states')
+            row.append(ids[n])
+        nd.append(row); i += 1
+    return nd, 0, set(range(len(Q))), None
+
+def runs_abs(K, mod=6, cap=3):
+    def upd(st, a):
+        if st == 'far': return 'far' if a == 0 else ((1, 1, 1),)
+        runs = list(st); sym, c, m = runs[-1]
+        if sym == a: runs[-1] = (a, min(c + 1, cap), (m + 1) % mod)
+        else: runs.append((a, 1, 1 % mod))
+        return tuple(runs[-K:])
+    return upd
+
+def alt_abs(K, mod=6, cap=3):
+    """segments: maximal alternating stretches; each (first symbol, last symbol, length capped, length mod)."""
+    def upd(st, a):
+        if st == 'far': return 'far' if a == 0 else ((1, 1, 1, 1),)
+        segs = list(st); f, l, c, m = segs[-1]
+        if l != a: segs[-1] = (f, a, min(c + 1, cap), (m + 1) % mod)
+        else: segs.append((a, a, 1, 1 % mod))
+        return tuple(segs[-K:])
+    return upd
+
+def check_abs(tm_str, updL, updR, init=None, start='A', maxconf=3_000_000):
+    """CTL check with DFAs given by incremental abstractions (no language part)."""
+    import builtins
+    dL = build_abs(updL); dR = build_abs(updR)
+    return _bfs(tm_str, dL, dR, init, start, maxconf)
+
 def sample_word(delta, target, maxlen=60):
     """A shortest word from 0 to target (as read from the far end)."""
     prev = {0: None}; dq = deque([0])
@@ -235,6 +274,10 @@ def check(tm_str, left_re, right_re, start='A', maxconf=2_000_000, verbose=True,
         dL = track2(dL, win, mod, cap); dR = track2(dR, win, mod, cap)
     elif K:
         dL = track(dL, K, mod, cap); dR = track(dR, K, mod, cap)
+    return _bfs(tm_str, dL, dR, init, start, maxconf)
+
+def _bfs(tm_str, dL, dR, init, start, maxconf):
+    tm = parse_tm(tm_str)
     res = {'nL': len(dL[0]), 'nR': len(dR[0])}
     for nm, d in (('left', dL), ('right', dR)):
         if d[0][0][0] != 0:
