@@ -161,9 +161,20 @@ Each start is run to the next sweep start at the outer right end (or 10^8 steps)
 
 ### 3. Halting forms
 
-The machine halts only when a right-moving head (B, C, D, then F) meets `0 0 1 1`. In every test above no halt
-occurred; in the region language above, `1 1` occurs only inside the Y end piece `B1 1 1 0`, which the frontier
-reaches only in phase X (y_right). No reachable halting form was found.
+The machine halts only when a right-moving head (B, C, D, then F in 115779's names) meets `0 0 1 1`. In every test
+above no halt occurred, and no reachable halting form was found. In the region language above, `1 1` occurs only in
+the Y end piece `B1 1 1 0` (heuristic: whether the frontier can meet it in a bad phase is part of the open frontier
+case analysis below).
+
+Random right contexts are **not** safe: X/Y starts with a random W over {`0`, `1 0`, `1 1 0`} halt in about 10% of
+cases (1,911 of 20,000), fully random W in about 10% too. Random *orders of the material blocks* {U, T, B1, B1 110}
+with any of the three outer-end pieces never halted (0 of 60,000), but produce block types outside the grammar
+(B_n with n ≡ 0 or 1 mod 3, partial `(1 0)` runs). So the invariant has to keep the passed-region grammar, not just
+"material".
+
+Q phase: Q occurs with last digits other than 1 (for example `P(6;[3])` ends in `Q r=3 [0,0,0,1,2]`; from P starts,
+3,642 of 5,461 Q endings have last digit 2). Every Q sweep takes 25 steps and is local: `Q(ds ++ [d]) → P(ds ++ [d+1, 0])`
+for every d (now proved in Rocq, `q_sweep`).
 
 ### 4. Revised estimate after stage 1
 
@@ -193,6 +204,63 @@ head between cells facing a side, DFAs read each half from the far end, predeces
 closed result can be exported as `MITMDFA` arrays (`mitm_cert`) and checked in Rocq. The DFAs are built from
 regular expressions (`lang2.py`): left `0* 1^(3a) (0 1^(3d+2))* (0 1*)? .{0,3}`; right
 `NEAR (U | T | B1 | B1 110)* END`, times a tracker of the last few cells and of 1-run and `10`-run lengths mod 6.
-Status: not closed yet. Every remaining failure is a spurious abstract path through transient near-head forms
+Status: **not closed**. Every remaining failure is a spurious abstract path through transient near-head forms
 (carry at the left end, nest start, closing up, outer-end phases); the real runs stay inside the language
-(`outside.py`). Continuing.
+(`outside.py`). A generic alternative (left half as its last K runs, right half as its last K alternating segments,
+lengths mod 6, `lang3.py`) blows up (over 200,000 DFA states for K ≥ 4, no closure for K ≤ 3).
+
+Conclusion of stage 2 for now: a closed language is not cheap here. A hand-built one needs the exact frontier case
+list, which is the same knowledge the hand proof needs; so I went on to stage 3, which also gives the case list.
+
+## Stage 3: the hand proof in Rocq (in progress)
+
+`rocq/` (build: `coqc -Q ../../../verify BusyCoq -Q . M23154 FILE` in `rocq/`, in the order of `_CoqProject`;
+requires `verify/Individual62.vo`, built by `make Individual62.vo` in `verify/`). All files use 23154's own state
+names; everything is *proved (Rocq)*, no admits, and `Print Assumptions` of every theorem below prints
+"Closed under the global context".
+
+| file | content |
+|---|---|
+| `M23154Rules.v` | 17 piece rules for all parameters (`es`): `tail_left`, `left_odd`, `left_even`, `turn_zero`, `turn_even`, `right_odd`, `tail_right`, `carry3`, `carry9`, `phase2`, `x_left`, `y_left`, `x_right`, `y_right`, `nest_start` |
+| `M23154Sweep.v` | digits (`enc`), `left_pass`, `right_pass` (induction over the odd digits), **`sweep_zero`, `sweep_even`** (one sweep for every digit list), **`raw_zero`, `raw_even`** (merge into the leftmost block) |
+| `M23154Carry.v` | **`carry3_sweep`, `carry9_sweep`** (left end, r = 3 and r = 6j+9), `phase2_sweep`, and **`q_sweep`** (the Q phase for any last digit; new, not in the Lean files) |
+| `M23154Reach.v` | **`reach_D0`**: `c0 -->* Q (raw 3) [0,0,1,1,1,0,2,1^10]` (by computation, `solve_init`) |
+| `M23154Inner.v` | `core_zero`, `core_even` (a sweep's core for any right context), `close_rpass`, **`inner_X_zero`, `inner_X_even`, `inner_Y_zero`, `inner_Y_even`** (inner sweeps eating passed digits 1), **`nest_sweep`** (start of a nested run, first digit 1) |
+
+This re-proves in Rocq every theorem of the explorer's Lean files except the computed runs (`MacroRun`, `Rle`,
+`Nested`, `RunLong`, `Reduce`), which only matter for finite prefixes.
+
+### What remains (the frontier program)
+
+The part no one has formalized, and the bulk of the remaining work:
+
+1. **Arrivals.** Every right pass ends as `z <* [1;1;1] {{B}}> T`, after rebuilding the blocks `B_(3k+2)` at the
+   front of T (`right_pass`). Then T starts with an end piece (`0 0 1` + blank; `B1`; `B1 1 1 0`) followed by W. A
+   frontier lemma is needed for each way the next blocks can start: `B1` followed by `B2` (done: `x_right`),
+   `B1 1 1 0` (done: `y_right`), `B1` followed by `U` (it is read as `B_(3a+1)`; simulated: it eats U and the next
+   token in one sweep and stays in X), `B1` followed by `B1` (a region boundary: closing up), `B1` followed by the
+   final end, `0 0 1` + blank (done: `tail_right`), and the outer-end variants after a region end (X/Y with blank
+   right, `0 0 1 0 1`).
+2. **Nest starts in every phase and with any first digit.** `nest_sweep` covers the outer P phase with first digit
+   1. Needed: first digit 2a+1 > 1 (leaves `U^a`), and nests that start from an inner sweep (end pieces `B1`,
+   `B1 1 1 0`), i.e. `W' = U^a T* E_φ W`.
+3. **Closing up** a region when the frontier meets a boundary, for each phase, and its end at the next boundary or
+   the final end.
+4. **The invariant**: macro configurations (r, digits, phase, W) with W in the grammar
+   `R (B1 (110)? R)* 0 0 1`, R = `U* T*` (or the closure of this under the frontier events, if larger), plus the
+   proof that every macro step (an outer sweep, an inner sweep, a left-end event, a nest start, a frontier event)
+   maps the set into itself in at least one machine step; then `progress_nonhalt` from `reach_D0`.
+5. **115779 and TM567**: 115779 needs its own reach lemma (blank → `P (raw 3) [0,2,2,1,1,1,1,1,2,0]` at step
+   2,340, a renamed copy of the rules); TM567 follows from 23154 through `Eqv_v2` (`TM567.eqv`).
+
+Items 1–3 are a finite case list (every case seen in simulation so far is one of a few block patterns), and each
+case is an `es`-provable rule plus bookkeeping like `inner_X_zero`. The case list has to be completed first by
+simulation (`tools/rpass.py`, `tools/exh.c`), then each case proved.
+
+### Revised estimate
+
+Done in this session: stage 0, stage 1, the stage 2 attempts, and the Rocq foundation (all known rules). Left:
+items 1–5, about 3–4 weeks of focused work by the stage-1 picture; the main risk is that the closure of the region
+grammar under the frontier events is larger than the grammar seen in real runs (the random-order test produced
+new block types), which would make the invariant longer but, from everything seen, still finite. Nothing so far
+meets a switching criterion (no halt, no unbounded case list, not twice over the estimate).

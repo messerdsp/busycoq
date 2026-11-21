@@ -79,3 +79,17 @@ Proof.
   rewrite !enc_snoc.
   apply phase2.
 Qed.
+
+(** The Q phase for any last digit (the explorer's [phase2] is the case d = 1). *)
+Lemma q_end l : l <* [1;1;1;1;0;1;1] {{C}}> const 0 -->* l <* [1;0;1;1;0;1;1;1;1;1] {{C}}> const 0.
+Proof. es. Qed.
+
+Theorem q_sweep l ds d : Q l (ds ++ [d]) -->* P l (ds ++ [d + 1; O]).
+Proof.
+  unfold Q, P.
+  replace (ds ++ [d + 1; O]) with ((ds ++ [d + 1]) ++ [O]) by (rewrite <- app_assoc; reflexivity).
+  rewrite !enc_snoc.
+  replace (3 * (d + 1) + 2) with (S (S (S (3 * d + 2)))) by lia.
+  replace (3 * d + 2) with (S (S (3 * d))) by lia.
+  apply q_end.
+Qed.
